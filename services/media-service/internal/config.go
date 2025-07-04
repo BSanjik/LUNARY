@@ -1,0 +1,2 @@
+// Конфигурация
+package internal

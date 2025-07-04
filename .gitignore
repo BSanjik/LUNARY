@@ -1,0 +1,68 @@
+# === GLOBAL IGNORE RULES ===
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+
+# === GO BACKEND ===
+**/bin/
+**/vendor/
+**/*.exe
+**/*.out
+**/*.test
+*.coverprofile
+
+# === Go Modules Cache (если случайно добавят) ===
+go.sum
+*.mod~
+
+# === FLUTTER FRONTEND ===
+**/build/
+**/.dart_tool/
+**/.packages
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.metadata
+**/pubspec.lock
+
+# === ENV FILES ===
+.env
+.env.*
+!.env.example
+
+# === DOCKER ===
+**/docker-compose.override.yml
+**/.docker/
+**/.envrc
+
+# === K8s Local Configs ===
+**/k8s/.kubeconfig
+**/k8s/*.local.yaml
+
+# === IDEs ===
+# VSCode
+.vscode/
+# JetBrains (GoLand, IntelliJ, etc.)
+.idea/
+*.iml
+
+# === DRAWIO / DIAGRAMS ===
+**/*.drawio~             # Временные файлы Draw.io
+**/*.drawio.bak
+**/diagrams/exported/    # Если экспортируешь PNG/SVG
+
+# === TEST OUTPUT ===
+**/coverage/
+*.lcov
+**/test-results/
+
+# === NODE.JS (если есть скрипты или админка) ===
+node_modules/
+package-lock.json
+yarn.lock
+
+# === SYSTEM FILES ===
+*.bak
+*.orig
