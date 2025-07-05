@@ -8,24 +8,16 @@ import (
 )
 
 type Config struct {
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	JWTSecret  string
-	Port       string
+	Port      string
+	DBUrl     string
+	JWTSecret string
 }
 
 func LoadConfig() *Config {
 	godotenv.Load(".env")
 	return &Config{
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     os.Getenv("DB_PORT"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBName:     os.Getenv("DB_NAME"),
-		JWTSecret:  os.Getenv("JWT_SECRET"),
-		Port:       os.Getenv("PORT"),
+		Port:      os.Getenv("PORT"),
+		DBUrl:     os.Getenv("DB_URL"),
+		JWTSecret: os.Getenv("JWT_SECRET"),
 	}
 }
