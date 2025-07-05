@@ -1,5 +1,4 @@
 //Точка входа приложения
-//точка входа приложения
 
 import 'package:flutter/material.dart';
 
