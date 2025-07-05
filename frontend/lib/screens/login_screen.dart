@@ -1,5 +1,5 @@
 //Экран авторизации
-
+//Экран авторизации
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
