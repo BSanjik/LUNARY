@@ -26,6 +26,7 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/register", h.Register).Methods("POST")
+	r.HandleFunc("/login", h.Login).Methods("POST")
 
 	log.Println("Auth service running on port", cfg.Port)
 	http.ListenAndServe(":"+cfg.Port, r)
