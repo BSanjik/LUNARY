@@ -1,23 +1,42 @@
 # Dockerfile for auth-service
-FROM golang:1.24.3
+FROM golang:1.24.3 AS builder
+
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+# Зависимости
+COPY go.mod ./
+COPY go.sum ./
 RUN go mod download
 
+# Исходники
 COPY . .
 
-# Установить swag
-ENV PATH="/go/bin:${PATH}"
+# Сборка бинарника
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o auth-service ./cmd/main.go
 
-RUN go install github.com/swaggo/swag/cmd/swag@latest && \
-    swag init --generalInfo cmd/main.go --output docs
 
-RUN go build -o auth-service ./cmd/main.go
+# ---------- Final stage ----------
+FROM alpine:latest
 
-EXPOSE 8081
+# Установим сертификаты (для HTTPS)
+RUN apk --no-cache add ca-certificates
 
-COPY wait-for-it.sh .
+# Рабочая директория внутри контейнера
+WORKDIR /app
 
+# Копируем бинарник
+COPY --from=builder /app/auth-service .
+
+# Копируем миграции, если есть
+COPY migrations ./migrations
+
+#  Копируем wait-for-it.sh
+COPY wait-for-it.sh ./wait-for-it.sh
+RUN chmod +x ./wait-for-it.sh
+
+# Порт, если нужен
+EXPOSE 8080
+
+# Запуск
 CMD ["./wait-for-it.sh", "postgres:5432", "--", "./auth-service"]

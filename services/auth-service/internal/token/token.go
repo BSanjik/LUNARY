@@ -7,24 +7,27 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var JWTkey []byte
-
-func Init(secret string) {
-	JWTkey = []byte(secret)
+type TokenService struct {
+	Secret string
 }
 
-func GenerateToken(userID int64) (string, error) {
+func New(secret string) *TokenService {
+	return &TokenService{Secret: secret}
+}
+
+func (t *TokenService) Generate(userID int64) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"exp":     time.Now().Add(24 * time.Hour).Unix(),
+		"exp":     time.Now().Add(time.Hour * 72).Unix(),
+		"iat":     time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(JWTkey)
+	return token.SignedString([]byte(t.Secret))
 }
 
-func ValidateToken(tokenStr string) (int64, error) {
-	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-		return JWTkey, nil
+func (t *TokenService) Parse(tokenStr string) (int64, error) {
+	token, err := jwt.Parse(tokenStr, func(tk *jwt.Token) (interface{}, error) {
+		return []byte(t.Secret), nil
 	})
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return int64(claims["user_id"].(float64)), nil

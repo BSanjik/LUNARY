@@ -1,0 +1,28 @@
+SERVICE_NAME=auth-service
+PORT=8080
+
+# Сборка бинарника
+build:
+	go build -o $(SERVICE_NAME) ./cmd/main.go
+
+# Локальный запуск
+run:
+	go run ./cmd/main.go
+
+# Docker build
+docker-build:
+	docker build -t lunary/$(SERVICE_NAME):latest .
+
+# Docker run (локально)
+docker-run:
+	docker run -p $(PORT):$(PORT) lunary/$(SERVICE_NAME):latest
+
+# Миграции (если используешь golang-migrate)
+migrate-up:
+	migrate -path ./migrations -database $(DB_URL) up
+
+migrate-down:
+	migrate -path ./migrations -database $(DB_URL) down
+
+migrate-force:
+	migrate -path ./migrations -database $(DB_URL) force 1
