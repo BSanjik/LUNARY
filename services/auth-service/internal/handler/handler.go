@@ -17,33 +17,55 @@ type AuthHandler struct {
 	DB *sql.DB
 }
 
-type registerRequest struct {
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
+type RegisterRequest struct {
+	Phone    string `json:"phone" example:"+77001234567"`
+	Password string `json:"password" example:"MySecurePassword123"`
+	Email    string `json:"email" example:"user@example.com"`
 }
 
-type registerResponse struct {
-	Token string `json:"token"`
+type RegisterResponse struct {
+	Token string `json:"token" example:"jwt.token.here"`
 }
 
-type loginRequest struct {
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
+type LoginRequest struct {
+	Phone    string `json:"phone" example:"+77001234567"`
+	Password string `json:"password" example:"MySecurePassword123"`
 }
 
-type loginResponse struct {
-	Token string `json:"token"`
+type LoginResponse struct {
+	Token string `json:"token" example:"jwt.token.here"`
+}
+
+type ErrorResponse struct {
+	Message string `json:"message"`
 }
 
 var phoneRegex = regexp.MustCompile(`^\+?[0-9]{10,15}$`)
 
+func respondWithError(w http.ResponseWriter, code int, message string) {
+	w.WriteHeader(code)
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(ErrorResponse{Message: message})
+}
+
 // Регистрация
+// Register godoc
+// @Summary Регистрация нового пользователя
+// @Description Создает нового пользователя и возвращает JWT токен
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body RegisterRequest true "Данные пользователя"
+// @Success 201 {object} RegisterResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 409 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var req registerRequest
+	var req RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Неверный JSON", http.StatusBadRequest)
 		log.Println("[Register] Ошибка декодирования JSON:", err)
+		respondWithError(w, http.StatusBadRequest, "Неверный JSON")
 		return
 	}
 
@@ -53,11 +75,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	//phone and pass validation
 	if !phoneRegex.MatchString(req.Phone) {
-		http.Error(w, "Неверный формат телефона. Используйте только цифры, от 10 до 15 символов", http.StatusBadRequest)
+		respondWithError(w, http.StatusBadRequest, "Неверный формат телефона")
 		return
 	}
 	if len(req.Password) < 12 {
-		http.Error(w, "Пароль должен содержать 12 символов", http.StatusBadRequest)
+		respondWithError(w, http.StatusBadRequest, "Пароль должен содержать минимум 12 символов")
 		return
 	}
 
@@ -65,20 +87,20 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var isExist bool
 	err := h.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE phone=$1)", req.Phone).Scan(&isExist)
 	if err != nil {
-		http.Error(w, "Ошибка при проверке телефона в базе ", http.StatusInternalServerError)
 		log.Println("[Register] Ошибка запроса:", err)
+		respondWithError(w, http.StatusInternalServerError, "Ошибка проверки пользователя в базе")
 		return
 	}
 	if isExist {
-		http.Error(w, "Пользователь с таким телефоном уже зарегистрирован", http.StatusConflict)
+		respondWithError(w, http.StatusConflict, "Пользователь с таким телефоном уже существует")
 		return
 	}
 
 	//hash pass
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, "Ошибка при хешировании пароля", http.StatusInternalServerError)
 		log.Println("[Register] bcrypt error:", err)
+		respondWithError(w, http.StatusInternalServerError, "Ошибка шифрования пароля")
 		return
 	}
 
@@ -86,31 +108,43 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var userID int64
 	err = h.DB.QueryRow("INSERT INTO users (phone, password, email) VALUES ($1, $2, $3) RETURNING id", req.Phone, string(hashedPass), req.Email).Scan(&userID)
 	if err != nil {
-		http.Error(w, "Ошибка при сохранении пользователя", http.StatusInternalServerError)
 		log.Println("[Register] Ошибка вставки:", err)
+		respondWithError(w, http.StatusInternalServerError, "Ошибка сохранения пользователя")
 		return
 	}
 
 	//JWT generation
 	tokenStr, err := token.GenerateToken(userID)
 	if err != nil {
-		http.Error(w, "Ошибка генерации токена", http.StatusInternalServerError)
 		log.Println("[Register] Token error:", err)
+		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 		return
 	}
 
 	//Response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(registerResponse{Token: tokenStr})
+	json.NewEncoder(w).Encode(RegisterResponse{Token: tokenStr})
 
 }
 
 // Авторизация
+// Login godoc
+// @Summary Авторизация пользователя
+// @Description Принимает телефон и пароль, возвращает JWT токен
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body LoginRequest true "Данные входа"
+// @Success 200 {object} LoginResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var req loginRequest
+	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Неверный JSON", http.StatusBadRequest)
 		log.Println("[Login] Ошибка декодирования JSON:", err)
+		respondWithError(w, http.StatusBadRequest, "Неверный JSON")
 		return
 	}
 
@@ -118,7 +152,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	req.Password = strings.TrimSpace(req.Password)
 
 	if !phoneRegex.MatchString(req.Phone) {
-		http.Error(w, "Неверный формат телефона", http.StatusBadRequest)
+		respondWithError(w, http.StatusBadRequest, "Неверный формат телефона")
 		return
 	}
 
@@ -126,27 +160,27 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var hashedPass string
 	err := h.DB.QueryRow("SELECT id, password FROM users WHERE phone = $1", req.Phone).Scan(&userID, &hashedPass)
 	if err == sql.ErrNoRows {
-		http.Error(w, "Неверный номер телефона или пароль", http.StatusUnauthorized)
+		respondWithError(w, http.StatusUnauthorized, "Неверный номер телефона или пароль")
 		return
 	} else if err != nil {
-		http.Error(w, "Ошибка при получении пользователя", http.StatusInternalServerError)
 		log.Println("[Login] Ошибка запроса:", err)
+		respondWithError(w, http.StatusInternalServerError, "Ошибка базы данных")
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(req.Password))
 	if err != nil {
-		http.Error(w, "Неверный номер телефона или пароль", http.StatusUnauthorized)
+		respondWithError(w, http.StatusUnauthorized, "Неверный номер телефона или пароль")
 		return
 	}
 
 	tokenStr, err := token.GenerateToken(userID)
 	if err != nil {
-		http.Error(w, "Ошибка генерации токена", http.StatusInternalServerError)
 		log.Println("[Login] Token error:", err)
+		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(loginResponse{Token: tokenStr})
+	json.NewEncoder(w).Encode(LoginResponse{Token: tokenStr})
 }
