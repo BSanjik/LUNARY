@@ -34,7 +34,7 @@ func main() {
 	h := &handler.AuthHandler{DB: conn}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/register", h.Register).Methods("POST")
+	r.HandleFunc("/registration", h.Registration).Methods("POST")
 	r.HandleFunc("/login", h.Login).Methods("POST")
 
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)

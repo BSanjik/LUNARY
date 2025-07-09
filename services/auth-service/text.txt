@@ -1,0 +1,62 @@
+✅ 1. Запуск Docker Compose
+bash
+
+docker-compose up --build
+Это соберёт контейнеры,поднимет PostgreSQL, auth-service и api-gateway,выполнит миграции автоматически.
+
+✅ 2. Проверка, что всё работает
+Если вы видите логи вроде:
+
+Auth service running on port 8081
+API Gateway started at :8080
+
+Значит — сервис успешно поднялся. Можно тестировать.
+
+✅ 3. Регистрируем пользователя (через Postman)
+
+Regitration
+
+POST http://localhost:8080/auth/register
+
+Headers Content-Type application/json
+
+request
+{
+  "phone": "+7700111226",
+  "password": "123456789101112",
+  "email": "email@mail.com"
+}
+
+response
+{
+    "token": "token"
+}
+
+✅ 4. Проверка входа (Login)
+
+LOGIN 
+
+POST http://localhost:8080/auth/login
+
+Headers Content-Type application/json
+
+request
+{
+  "phone": "+7700111226",
+  "password": "123456789101112"
+}
+
+response
+{
+    "token": "token"
+}
+
+
+✅ 5. Если миграции не применились автоматически
+Зайди в контейнер: 
+
+docker exec -it lunary-auth sh
+
+И запусти вручную:
+
+migrate -path=./migrations -database "postgres://postgres:mypassword@postgres:5432/lunary_auth?sslmode=disable" up
