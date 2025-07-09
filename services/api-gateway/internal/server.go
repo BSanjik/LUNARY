@@ -15,12 +15,24 @@ import (
 func NewServer(cfg *config.Config) *http.Server {
 	limiter := rate.NewLimiter(5, 10)
 
-	proxyHandler := proxy.NewProxy(cfg.Services)
-
 	mux := http.NewServeMux()
 
-	handler := middleware.LoggingMiddleware(middleware.RateLimitMiddleware(limiter)(middleware.JWTMiddleware([]byte(cfg.JWTSecret), []string{"/auth"})(proxyHandler)))
+	// Маршруты, которые не требуют JWT
+	exempt := []string{"/auth/register", "/auth/login"}
 
+	// Обёртываем proxy
+	proxyHandler := proxy.NewProxy(cfg.Services)
+
+	// Оборачиваем middleware
+	handler := middleware.LoggingMiddleware(
+		middleware.RateLimitMiddleware(limiter)(
+			middleware.JWTMiddleware([]byte(cfg.JWTSecret), exempt)(
+				proxyHandler,
+			),
+		),
+	)
+
+	// Регистрируем "/" после middleware
 	mux.Handle("/", handler)
 
 	return &http.Server{

@@ -32,12 +32,12 @@ func LoadConfig() (*Config, error) {
 	}
 
 	services := map[string]string{
-		"auth":  getEnvOrDefault("SERVICE_AUTH", "http://localhost:8001"),
-		"user":  getEnvOrDefault("SERVICE_USER", "http://localhost:8002"),
-		"ad":    getEnvOrDefault("SERVICE_AD", "http://localhost:8003"),
-		"ai":    getEnvOrDefault("SERVICE_AI", "http://localhost:8004"),
-		"media": getEnvOrDefault("SERVICE_MEDIA", "http://localhost:8005"),
-		"notif": getEnvOrDefault("SERVICE_NOTIF", "http://localhost:8006"),
+		"auth":  getEnvOrDefault("SERVICE_AUTH", "http://localhost:8081"),
+		"user":  getEnvOrDefault("SERVICE_USER", "http://localhost:8082"),
+		"ad":    getEnvOrDefault("SERVICE_AD", "http://localhost:8083"),
+		"ai":    getEnvOrDefault("SERVICE_AI", "http://localhost:8084"),
+		"media": getEnvOrDefault("SERVICE_MEDIA", "http://localhost:8085"),
+		"notif": getEnvOrDefault("SERVICE_NOTIF", "http://localhost:8086"),
 	}
 	return &Config{
 		JWTSecret:   jwtSecret,

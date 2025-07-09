@@ -1,7 +1,43 @@
 #Контейнер для auth сервиса
-version: '3.8'
-
 services:
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: lunary-gateway
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./services/api-gateway/.env
+    environment:
+      - LISTEN_ADDR=:8080
+      - JWT_SECRET=supersecretkey123
+      - SERVICE_AUTH=http://auth-service:8081
+    depends_on:
+      - auth-service
+    networks:
+      - lunary-network
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+    container_name: lunary-auth
+    ports:
+      - "8081:8080"
+    env_file:
+    - ./services/auth-service/.env
+    environment:
+      - PORT=8081
+      - JWT_SECRET=supersecretkey123
+      - DB_URL=postgres://postgres:mypassword@postgres:5432/lunary_auth?sslmode=disable
+    depends_on:
+      - postgres
+    volumes:
+      - ./services/auth-service/migrations:/app/migrations
+    command: ["/app/wait-for-it.sh", "postgres:5432", "--", "/app/auth-service"]
+    networks:
+      - lunary-network
+  
   postgres:
     image: postgres:15
     container_name: lunary-postgres
@@ -13,18 +49,12 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-
-  auth-service:
-    build:
-      context: ./services/auth-service
-    container_name: lunary-auth
-    env_file:
-      - ./services/auth-service/.env
-    ports:
-      - "8081:8081"
-    depends_on:
-      - postgres
+      - lunary-pgdata:/var/lib/postgresql/data
+    networks:
+      - lunary-network 
 
 volumes:
-  pgdata:
+  lunary-pgdata:
+
+networks:
+  lunary-network:
