@@ -30,7 +30,24 @@ services:
     command: ["/app/wait-for-it.sh", "postgres:5432", "--", "/app/auth-service"]
     networks:
       - lunary-network
-  
+
+  scenario-service:
+    build:
+      context: ./services/scenario-service
+      dockerfile: Dockerfile
+    container_name: lunary-scenario
+    ports:
+      - "8082:8082"
+    env_file:
+      - ./services/scenario-service/.env
+    depends_on:
+      - postgres
+    volumes:
+      - ./services/scenario-service/migrations:/app/migrations
+    command: ["/app/wait-for-it.sh", "postgres:5432", "--", "/app/scenario-service"]
+    networks:
+      - lunary-network
+      
   postgres:
     image: postgres:15
     container_name: lunary-postgres
