@@ -44,7 +44,7 @@ services:
       - postgres
     volumes:
       - ./services/scenario-service/migrations:/app/migrations
-    command: ["/app/wait-for-it.sh", "postgres:5432", "--", "/app/scenario-service"]
+    command: ["/app/scenario-service"]
     networks:
       - lunary-network
       
