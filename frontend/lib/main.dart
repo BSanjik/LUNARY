@@ -24,9 +24,10 @@ class MyApp extends StatelessWidget {
       ],
       builder: (context, child) {
         return MaterialApp(
-          title: 'Приложение для торговли',
+          title: 'Lunary',
           theme: ThemeData(
-            primarySwatch: const Color.fromRGBO(33, 150, 243, 1),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+            useMaterial3: true,
             visualDensity: VisualDensity.adaptivePlatformDensity,
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.blue,
