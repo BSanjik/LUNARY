@@ -67,7 +67,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/registration": {
+        "/register": {
             "post": {
                 "description": "Создает нового пользователя и возвращает JWT токен",
                 "consumes": [
@@ -190,10 +190,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "API сервиса авторизации LUNARY",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {
-	swag.Registration(SwaggerInfo.InstanceName(), SwaggerInfo)
+	swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
 }

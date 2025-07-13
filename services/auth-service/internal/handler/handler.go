@@ -43,8 +43,8 @@ type ErrorResponse struct {
 var phoneRegex = regexp.MustCompile(`^\+?[0-9]{10,15}$`)
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
-	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
 	_ = json.NewEncoder(w).Encode(ErrorResponse{Message: message})
 }
 

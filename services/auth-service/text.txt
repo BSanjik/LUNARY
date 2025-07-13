@@ -60,3 +60,9 @@ docker exec -it lunary-auth sh
 И запусти вручную:
 
 migrate -path=./migrations -database "postgres://postgres:mypassword@postgres:5432/lunary_auth?sslmode=disable" up
+
+
+
+
+
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI0ODY1NDUsInVzZXJfaWQiOjF9.le5uE4PYT7NvrQWy4sIcjJvbJGRzHYP8hAyCBYp0Hwo"

@@ -1,6 +1,8 @@
 module github.com/BSanjik/LUNARY/services/auth-service
 
-go 1.24.2
+go 1.23.0
+
+toolchain go1.24.2
 
 replace github.com/BSanjik/LUNARY/services/api-gateway => ./
 
@@ -10,7 +12,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/swaggo/http-swagger v1.3.4
-	github.com/swaggo/swag v1.16.4
+	github.com/swaggo/swag v1.8.12
 	golang.org/x/crypto v0.39.0
 )
 

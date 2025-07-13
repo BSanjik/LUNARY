@@ -27,7 +27,7 @@ services:
       - postgres
     volumes:
       - ./services/auth-service/migrations:/app/migrations
-    command: ["/app/wait-for-it.sh", "postgres:5432", "--", "/app/auth-service"]
+    command: ["./start.sh"]
     networks:
       - lunary-network
 
@@ -38,13 +38,19 @@ services:
     container_name: lunary-scenario
     ports:
       - "8082:8082"
-    env_file:
-      - ./services/scenario-service/.env
+    environment:
+      - DB_URL=postgres://postgres:mypassword@postgres:5432/lunary?sslmode=disable
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=lunary
+      - DB_USER=postgres
+      - DB_PASSWORD=mypassword
     depends_on:
       - postgres
+      - auth-service
     volumes:
       - ./services/scenario-service/migrations:/app/migrations
-    command: ["/app/scenario-service"]
+    command: ["sh", "-c", "sleep 10 && echo '✅ Запускаем scenario-service...' && /app/scenario-service"]
     networks:
       - lunary-network
       
@@ -53,13 +59,14 @@ services:
     container_name: lunary-postgres
     restart: always
     environment:
-      POSTGRES_DB: lunary_auth
+      POSTGRES_DB: lunary
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mypassword
     ports:
       - "5432:5432"
     volumes:
       - lunary-pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - lunary-network 
 

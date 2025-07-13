@@ -18,6 +18,23 @@ type Step struct {
 	Price      float64 `json:"price"`
 }
 
+// Модель для фидбека
+type Feedback struct {
+	ID         int64  `json:"id"`
+	ScenarioID int64  `json:"scenario_id"`
+	Rating     int    `json:"rating"` // 1-5 звезд
+	Comment    string `json:"comment"`
+	UserLogin  string `json:"user_login,omitempty"`
+	CreatedAt  string `json:"created_at"`
+}
+
+type FeedbackRequest struct {
+	ScenarioID int64  `json:"scenario_id"`
+	Rating     int    `json:"rating"`
+	Comment    string `json:"comment"`
+	UserLogin  string `json:"user_login,omitempty"`
+}
+
 // CREATE TABLE scenarios (
 //     id SERIAL PRIMARY KEY,
 //     title TEXT NOT NULL,

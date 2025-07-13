@@ -14,7 +14,7 @@ type Storage struct {
 func (s *Storage) GetScenarioByText(ctx context.Context, query string) (*model.Scenario, error) {
 	var scenario model.Scenario
 	err := s.DB.QueryRowContext(ctx, `
-		SELECT id, title, location, price
+		SELECT id, title, category, description
 		FROM scenarios
 		WHERE title ILIKE '%' || $1 || '%' OR location ILIKE '%' || $1 || '%'
 		LIMIT 1
@@ -45,4 +45,13 @@ func (s *Storage) GetScenarioByText(ctx context.Context, query string) (*model.S
 	}
 
 	return &scenario, nil
+}
+
+func (s *Storage) SaveFeedback(ctx context.Context, feedback *model.FeedbackRequest) error {
+	_, err := s.DB.ExecContext(ctx, `
+		INSERT INTO feedback (scenario_id, rating, comment, user_login, created_at)
+		VALUES ($1, $2, $3, $4, NOW())
+	`, feedback.ScenarioID, feedback.Rating, feedback.Comment, feedback.UserLogin)
+
+	return err
 }

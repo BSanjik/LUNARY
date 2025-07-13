@@ -1,5 +1,5 @@
 # Dockerfile for auth-service
-FROM golang:1.24.3
+FROM golang:1.23
 
 WORKDIR /app
 
@@ -26,7 +26,10 @@ COPY . .
 ENV PATH="/go/bin:${PATH}"
 
 RUN go install github.com/swaggo/swag/cmd/swag@latest && \
-    swag init --generalInfo cmd/main.go --output docs
+    rm -rf docs/* && \
+    swag init --generalInfo cmd/main.go --output docs --parseDependency --parseInternal && \
+    sed -i '/LeftDelim:/d' docs/docs.go && \
+    sed -i '/RightDelim:/d' docs/docs.go
 
 # Сборка бинарника
 RUN go build -o auth-service ./cmd/main.go

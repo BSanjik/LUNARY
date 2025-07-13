@@ -27,13 +27,13 @@ func LoadConfig() (*Config, error) {
 	}
 
 	listenAddr := os.Getenv("LISTEN_ADDR")
-	if listenAddr == " " {
+	if listenAddr == "" {
 		listenAddr = ":8080"
 	}
 
 	services := map[string]string{
 		"auth":     getEnvOrDefault("SERVICE_AUTH", "http://localhost:8081"),
-		"scenario": getEnvOrDefault("SERVICE_AI", "http://localhost:8082"),
+		"scenario": getEnvOrDefault("SERVICE_SCENARIO", "http://localhost:8082"),
 	}
 	return &Config{
 		JWTSecret:   jwtSecret,
