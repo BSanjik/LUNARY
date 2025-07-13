@@ -1,2 +1,0 @@
-// Общий логгер
-package shared
