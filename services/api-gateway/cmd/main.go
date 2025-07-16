@@ -4,8 +4,8 @@ package main
 import (
 	"log"
 
-	"github.com/BSanjik/LUNARY/services/api-gateway/internal"
-	"github.com/BSanjik/LUNARY/services/api-gateway/internal/config"
+	"api-gateway/internal"
+	"api-gateway/internal/config"
 )
 
 func main() {

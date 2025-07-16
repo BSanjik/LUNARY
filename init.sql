@@ -1,1 +1,3 @@
--- Инициализация завершена - все сервисы используют одну БД lunary_auth 
+-- Создаем базу данных только если не существует
+SELECT 'CREATE DATABASE lunary'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'lunary')\gexec

@@ -23,20 +23,20 @@ func (h *Handler) GetScenario(w http.ResponseWriter, r *http.Request) {
 
 	//read json
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		http.Error(w, "Некорректный формат запроса", http.StatusBadRequest)
 		return
 	}
 
 	//check request
 	if req.Query == "" {
-		http.Error(w, "`query` is required", http.StatusBadRequest)
+		http.Error(w, "Поле 'query' обязательно для заполнения", http.StatusBadRequest)
 		return
 	}
 
 	//get scenario
 	scenario, err := h.Service.GetScenario(context.Background(), req.Query)
 	if err != nil {
-		http.Error(w, "scenario not found", http.StatusNotFound)
+		http.Error(w, "Сценарий не найден. Попробуйте изменить запрос", http.StatusNotFound)
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *Handler) SubmitFeedback(w http.ResponseWriter, r *http.Request) {
 
 	//read json
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		http.Error(w, "Некорректный формат данных", http.StatusBadRequest)
 		return
 	}
 

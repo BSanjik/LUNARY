@@ -10,7 +10,7 @@ echo "⏳ Дополнительное ожидание стабилизации
 sleep 5
 
 echo "🚀 Выполняем миграции..."
-migrate -path=./migrations -database "postgres://postgres:mypassword@postgres:5432/lunary?sslmode=disable" up
+migrate -path=./migrations -database "${DB_URL}" up
 
 echo "✅ Миграции завершены, запускаем сервис..."
 ./auth-service

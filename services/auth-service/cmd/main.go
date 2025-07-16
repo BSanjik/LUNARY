@@ -10,28 +10,31 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/BSanjik/LUNARY/services/auth-service/internal/config"
-	"github.com/BSanjik/LUNARY/services/auth-service/internal/db"
-	"github.com/BSanjik/LUNARY/services/auth-service/internal/handler"
-	"github.com/BSanjik/LUNARY/services/auth-service/internal/token"
+	"auth-service/internal/config"
+	"auth-service/internal/handler"
+	"auth-service/internal/service"
+	"auth-service/internal/storage"
+	"auth-service/internal/token"
 
 	"github.com/gorilla/mux"
 
-	_ "github.com/BSanjik/LUNARY/services/auth-service/docs"
+	_ "auth-service/docs"
+
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
 	cfg := config.LoadConfig()
-	conn, err := db.InitDB(cfg)
+	store, err := storage.NewStorage(cfg)
 	if err != nil {
 		log.Fatal("DB error: ", err)
 	}
-	defer conn.Close()
+	defer store.DB.Close()
 
 	token.Init(cfg.JWTSecret)
 
-	h := &handler.AuthHandler{DB: conn}
+	svc := &service.AuthService{Storage: store}
+	h := &handler.Handler{Service: svc}
 
 	r := mux.NewRouter()
 	r.HandleFunc("/registration", h.Registration).Methods("POST")

@@ -2,19 +2,17 @@
 package handler
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"regexp"
 	"strings"
 
-	"github.com/BSanjik/LUNARY/services/auth-service/internal/token"
-	"golang.org/x/crypto/bcrypt"
+	"auth-service/internal/service"
 )
 
-type AuthHandler struct {
-	DB *sql.DB
+type Handler struct {
+	Service *service.AuthService
 }
 
 type RegisterRequest struct {
@@ -61,7 +59,7 @@ func respondWithError(w http.ResponseWriter, code int, message string) {
 // @Failure 409 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /register [post]
-func (h *AuthHandler) Registration(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("[Register] Ошибка декодирования JSON:", err)
@@ -83,42 +81,14 @@ func (h *AuthHandler) Registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//isExist validation
-	var isExist bool
-	err := h.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE phone=$1)", req.Phone).Scan(&isExist)
-	if err != nil {
-		log.Println("[Register] Ошибка запроса:", err)
-		respondWithError(w, http.StatusInternalServerError, "Ошибка проверки пользователя в базе")
-		return
-	}
-	if isExist {
-		respondWithError(w, http.StatusConflict, "Пользователь с таким телефоном уже существует")
-		return
-	}
-
-	//hash pass
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Println("[Register] bcrypt error:", err)
-		respondWithError(w, http.StatusInternalServerError, "Ошибка шифрования пароля")
-		return
-	}
-
-	//insert DB
-	var userID int64
-	err = h.DB.QueryRow("INSERT INTO users (phone, password, email) VALUES ($1, $2, $3) RETURNING id", req.Phone, string(hashedPass), req.Email).Scan(&userID)
-	if err != nil {
-		log.Println("[Register] Ошибка вставки:", err)
-		respondWithError(w, http.StatusInternalServerError, "Ошибка сохранения пользователя")
-		return
-	}
-
 	//JWT generation
-	tokenStr, err := token.GenerateToken(userID)
+	tokenStr, err := h.Service.Register(req.Phone, req.Password)
 	if err != nil {
-		log.Println("[Register] Token error:", err)
-		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
-		return
+		log.Println("[Register] Service error:", err)
+		if strings.Contains(err.Error(), "пользователь с таким номером уже существует") {
+			respondWithError(w, http.StatusInternalServerError, "Ошибка регистрации пользователя")
+			return
+		}
 	}
 
 	//Response
@@ -140,7 +110,7 @@ func (h *AuthHandler) Registration(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /login [post]
-func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("[Login] Ошибка декодирования JSON:", err)
@@ -156,27 +126,9 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var userID int64
-	var hashedPass string
-	err := h.DB.QueryRow("SELECT id, password FROM users WHERE phone = $1", req.Phone).Scan(&userID, &hashedPass)
-	if err == sql.ErrNoRows {
-		respondWithError(w, http.StatusUnauthorized, "Неверный номер телефона или пароль")
-		return
-	} else if err != nil {
-		log.Println("[Login] Ошибка запроса:", err)
-		respondWithError(w, http.StatusInternalServerError, "Ошибка базы данных")
-		return
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(req.Password))
+	tokenStr, err := h.Service.Login(req.Phone, req.Password)
 	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "Неверный номер телефона или пароль")
-		return
-	}
-
-	tokenStr, err := token.GenerateToken(userID)
-	if err != nil {
-		log.Println("[Login] Token error:", err)
+		log.Println("[Login] Service error:", err)
 		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
 		return
 	}

@@ -4,8 +4,6 @@ package config
 import (
 	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -14,10 +12,9 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("⚠️  .env файл не найден, используем переменные окружения")
-	}
+	// Используем только переменные окружения из docker-compose.yml
+	log.Println("📋 Загружаем конфигурацию из переменных окружения")
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8082"

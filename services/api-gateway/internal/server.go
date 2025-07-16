@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/BSanjik/LUNARY/services/api-gateway/internal/config"
-	"github.com/BSanjik/LUNARY/services/api-gateway/internal/middleware"
-	"github.com/BSanjik/LUNARY/services/api-gateway/internal/proxy"
+	"api-gateway/internal/config"
+	"api-gateway/internal/middleware"
+	"api-gateway/internal/proxy"
 
 	"golang.org/x/time/rate"
 )

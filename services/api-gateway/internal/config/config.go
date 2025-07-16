@@ -32,8 +32,8 @@ func LoadConfig() (*Config, error) {
 	}
 
 	services := map[string]string{
-		"auth":     getEnvOrDefault("SERVICE_AUTH", "http://localhost:8081"),
-		"scenario": getEnvOrDefault("SERVICE_SCENARIO", "http://localhost:8082"),
+		"auth":     getEnvOrDefault("SERVICE_AUTH", "http://auth-service:8081"),
+		"scenario": getEnvOrDefault("SERVICE_SCENARIO", "http://scenario-service:8082"),
 	}
 	return &Config{
 		JWTSecret:   jwtSecret,

@@ -1,24 +1,25 @@
 #Контейнер для auth сервиса
 services:
   api-gateway:
+    container_name: lunary-gateway
     build:
       context: ./services/api-gateway
       dockerfile: Dockerfile
-    container_name: lunary-gateway
     ports:
       - "8080:8080"
     env_file:
       - ./services/api-gateway/.env
     depends_on:
       - auth-service
+      - scenario-service
     networks:
       - lunary-network
 
   auth-service:
+    container_name: lunary-auth
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile
-    container_name: lunary-auth
     ports:
       - "8081:8081"
     env_file:
@@ -32,19 +33,14 @@ services:
       - lunary-network
 
   scenario-service:
+    container_name: lunary-scenario
     build:
       context: ./services/scenario-service
       dockerfile: Dockerfile
-    container_name: lunary-scenario
     ports:
       - "8082:8082"
-    environment:
-      - DB_URL=postgres://postgres:mypassword@postgres:5432/lunary?sslmode=disable
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=lunary
-      - DB_USER=postgres
-      - DB_PASSWORD=mypassword
+    env_file:
+      - ./services/scenario-service/.env
     depends_on:
       - postgres
       - auth-service
@@ -55,13 +51,15 @@ services:
       - lunary-network
       
   postgres:
-    image: postgres:15
     container_name: lunary-postgres
+    image: postgres:15
     restart: always
+    env_file:
+      - ./.env
     environment:
-      POSTGRES_DB: lunary
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mypassword
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
