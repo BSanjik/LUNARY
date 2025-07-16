@@ -1,70 +1,38 @@
-//Точка входа приложения
-
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'providers/auth_provider.dart';
+import 'providers/scenario_provider.dart';
+import 'screens/splash_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const LunaryApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LunaryApp extends StatelessWidget {
+  const LunaryApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<SellerData>(
-          create: (BuildContext context) => SellerData(),
+        ChangeNotifierProvider<AuthProvider>(
+          create: (context) => AuthProvider(),
         ),
-        ChangeNotifierProvider<BuyerData>(
-          create: (BuildContext context) => BuyerData(),
+        ChangeNotifierProvider<ScenarioProvider>(
+          create: (context) => ScenarioProvider(),
         ),
       ],
-      builder: (context, child) {
-        return MaterialApp(
-          title: 'Lunary',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-            useMaterial3: true,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white, // Text color for AppBar
-            ),
-            elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-              ),
-            ),
-            inputDecorationTheme: InputDecorationTheme(
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.blue, width: 2.0),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.red, width: 1.0),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.red, width: 2.0),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-          ),
-          home: const AuthSelectionScreen(),
-        );
-      },
+      child: MaterialApp(
+        title: 'LUNARY',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        home: const SplashScreen(),
+      ),
     );
   }
 }
