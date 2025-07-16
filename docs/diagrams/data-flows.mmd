@@ -1,0 +1,50 @@
+sequenceDiagram
+    participant Flutter as Flutter App
+    participant Gateway as API Gateway
+    participant Auth as Auth Service
+    participant Scenario as Scenario Service
+    participant DB as PostgreSQL
+    
+    %% User Registration Flow
+    Note over Flutter,DB: User Registration Flow
+    Flutter->>Gateway: POST /auth/register
+    Gateway->>Auth: Forward registration request
+    Auth->>DB: Save user data
+    DB-->>Auth: User created
+    Auth->>Auth: Generate JWT token
+    Auth-->>Gateway: User + JWT token
+    Gateway-->>Flutter: Registration success + token
+    
+    %% User Login Flow
+    Note over Flutter,DB: User Login Flow
+    Flutter->>Gateway: POST /auth/login
+    Gateway->>Auth: Forward login request
+    Auth->>DB: Verify credentials
+    DB-->>Auth: User data
+    Auth->>Auth: Generate JWT token
+    Auth-->>Gateway: Login success + token
+    Gateway-->>Flutter: JWT token
+    
+    %% Scenario Search Flow
+    Note over Flutter,DB: Scenario Search Flow
+    Flutter->>Gateway: GET /scenarios/search?query=birthday
+    Gateway->>Gateway: Validate JWT token
+    Gateway->>Auth: Validate token
+    Auth-->>Gateway: Token valid
+    Gateway->>Scenario: Forward search request
+    Scenario->>DB: Search scenarios
+    DB-->>Scenario: Scenario results
+    Scenario-->>Gateway: Search results
+    Gateway-->>Flutter: Scenarios list
+    
+    %% Feedback Submission Flow
+    Note over Flutter,DB: Feedback Submission Flow
+    Flutter->>Gateway: POST /scenarios/1/feedback
+    Gateway->>Gateway: Validate JWT token
+    Gateway->>Auth: Validate token
+    Auth-->>Gateway: Token valid + user info
+    Gateway->>Scenario: Forward feedback + user ID
+    Scenario->>DB: Save feedback
+    DB-->>Scenario: Feedback saved
+    Scenario-->>Gateway: Success response
+    Gateway-->>Flutter: Feedback submitted 

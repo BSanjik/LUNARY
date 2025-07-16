@@ -1,0 +1,94 @@
+erDiagram
+    USERS {
+        bigserial id PK
+        varchar name "NOT NULL"
+        varchar phone "UNIQUE NOT NULL"
+        varchar password_hash "NOT NULL"
+        timestamp created_at "DEFAULT NOW()"
+        timestamp updated_at "DEFAULT NOW()"
+    }
+    
+    SCENARIOS {
+        bigserial id PK
+        varchar title "NOT NULL"
+        text description
+        text detailed_description
+        varchar category
+        varchar duration
+        varchar participants
+        varchar budget
+        text tags "JSON array"
+        decimal rating "DEFAULT 0"
+        text materials "JSON array"
+        text steps "JSON array"
+        timestamp created_at "DEFAULT NOW()"
+        timestamp updated_at "DEFAULT NOW()"
+    }
+    
+    FEEDBACK {
+        bigserial id PK
+        bigint user_id FK
+        bigint scenario_id FK
+        integer rating "CHECK 1-5"
+        text comment
+        timestamp created_at "DEFAULT NOW()"
+    }
+    
+    %% Future tables (planning)
+    USER_PROFILES {
+        bigserial id PK
+        bigint user_id FK
+        varchar email
+        text preferences "JSON"
+        text statistics "JSON"
+        timestamp created_at "DEFAULT NOW()"
+        timestamp updated_at "DEFAULT NOW()"
+    }
+    
+    ADS {
+        bigserial id PK
+        bigint user_id FK
+        varchar title "NOT NULL"
+        text description
+        varchar category
+        decimal price
+        varchar location
+        text contact_info "JSON"
+        text images "JSON array"
+        enum status "active, inactive, expired"
+        timestamp created_at "DEFAULT NOW()"
+        timestamp expires_at
+    }
+    
+    MEDIA_FILES {
+        uuid id PK
+        bigint user_id FK
+        varchar filename
+        varchar original_name
+        varchar content_type
+        bigint file_size
+        varchar storage_path
+        timestamp uploaded_at "DEFAULT NOW()"
+    }
+    
+    NOTIFICATIONS {
+        bigserial id PK
+        bigint user_id FK
+        varchar type "push, email, sms"
+        varchar title
+        text message
+        text data "JSON"
+        enum status "pending, sent, failed"
+        timestamp created_at "DEFAULT NOW()"
+        timestamp sent_at
+    }
+    
+    %% Current relationships (MVP)
+    USERS ||--o{ FEEDBACK : "user_id"
+    SCENARIOS ||--o{ FEEDBACK : "scenario_id"
+    
+    %% Future relationships (planning)
+    USERS ||--o| USER_PROFILES : "user_id"
+    USERS ||--o{ ADS : "user_id"
+    USERS ||--o{ MEDIA_FILES : "user_id"
+    USERS ||--o{ NOTIFICATIONS : "user_id" 

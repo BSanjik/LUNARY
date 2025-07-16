@@ -1,0 +1,56 @@
+graph TB
+    %% Frontend Layer
+    FrontendApp["Flutter App<br/>iOS/Android"]
+    WebAdmin["Web Admin Panel<br/>(Planning)"]
+    
+    %% API Gateway Layer
+    APIGateway["API Gateway<br/>Port: 8080<br/>Rate Limiting, Auth, Routing"]
+    
+    %% Microservices Layer
+    AuthService["Auth Service<br/>Port: 8081<br/>Registration, Login, JWT"]
+    ScenarioService["Scenario Service<br/>Port: 8082<br/>Search, Scenarios, Feedback"]
+    UserService["User Service<br/>Port: 8083<br/>(In Development)"]
+    AdService["Ad Service<br/>Port: 8084<br/>(Planning)"]
+    MediaService["Media Service<br/>Port: 8085<br/>(Planning)"]
+    NotificationService["Notification Service<br/>Port: 8086<br/>(Planning)"]
+    
+    %% Database Layer
+    PostgreSQL["PostgreSQL<br/>Port: 5432<br/>Users, Scenarios, Feedback"]
+    
+    %% External Services
+    MinIO["MinIO<br/>Object Storage<br/>(Planning)"]
+    Redis["Redis<br/>Caching<br/>(Planning)"]
+    
+    %% Connections
+    FrontendApp --> APIGateway
+    WebAdmin --> APIGateway
+    
+    APIGateway --> AuthService
+    APIGateway --> ScenarioService
+    APIGateway --> UserService
+    APIGateway --> AdService
+    APIGateway --> MediaService
+    APIGateway --> NotificationService
+    
+    AuthService --> PostgreSQL
+    ScenarioService --> PostgreSQL
+    UserService --> PostgreSQL
+    AdService --> PostgreSQL
+    
+    MediaService --> MinIO
+    ScenarioService --> Redis
+    UserService --> Redis
+    
+    %% Styling
+    classDef ready fill:#90EE90,stroke:#333,stroke-width:2px,color:#000
+    classDef development fill:#FFD700,stroke:#333,stroke-width:2px,color:#000
+    classDef planning fill:#FFA07A,stroke:#333,stroke-width:2px,color:#000
+    classDef database fill:#87CEEB,stroke:#333,stroke-width:2px,color:#000
+    classDef gateway fill:#DDA0DD,stroke:#333,stroke-width:2px,color:#000
+    
+    class APIGateway gateway
+    class AuthService,ScenarioService ready
+    class UserService development
+    class AdService,MediaService,NotificationService,WebAdmin,MinIO,Redis planning
+    class PostgreSQL database
+    class FrontendApp ready 
