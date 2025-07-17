@@ -1,66 +1,37 @@
 name: lunary_app
-description: "A new Flutter project."
-publish_to: 'none' # Предотвращает случайную публикацию пакета
-
+description: "LUNARY - доска объявлений с AI-помощником"
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.3 <4.0.0'
+  sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-
-  # Иконки в стиле iOS
-  cupertino_icons: ^1.0.2
-
-  # HTTP запросы
-  http: ^1.2.1
-
-  # Шрифты от Google
+  
+  # UI
+  cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
-
-  # Provider
-  provider: ^6.1.5
-
-  #mask_text_input_formatter
-  mask_text_input_formatter: ^2.9.0
-
-  # Shared preferences для хранения токенов
-  shared_preferences: ^2.2.2
-
-  # Логирование и отладка
-  logger: ^2.0.2+1
+  
+  # State Management  
+  flutter_riverpod: ^2.5.1
+  
+  # Navigation
+  go_router: ^14.2.0
+  
+  # Networking (для Go backend)
+  dio: ^5.4.3
+  
+  # Storage
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^4.0.0
 
-  flutter_lints: ^2.0.0
-
-# Следующая секция содержит настройки для Flutter.
 flutter:
-  # Следующая строка включает использование Material Design иконок.
   uses-material-design: true
-
-
-  # Чтобы добавить ассеты (изображения, шрифты и т.д.) в ваше приложение,
-  # добавьте секцию assets, как показано здесь.
   assets:
     - assets/images/
-    # Пример добавления конкретного файла:
-    # - assets/images/logo.png
-
-  # Пример добавления шрифтов в приложение.
-  # Убедитесь, что у вас есть соответствующая папка 'fonts'
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
