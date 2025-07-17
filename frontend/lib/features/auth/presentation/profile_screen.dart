@@ -117,7 +117,7 @@ class _StatsCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 16),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _StatItem(
