@@ -4,6 +4,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"scenario-service/internal/model"
 	"scenario-service/internal/service"
@@ -19,16 +20,23 @@ type scenarioRequest struct {
 
 // POST Scenario
 func (h *Handler) GetScenario(w http.ResponseWriter, r *http.Request) {
+	log.Printf("🔍 Scenario-service: получен запрос %s %s", r.Method, r.URL.Path)
+	log.Printf("🔍 Scenario-service: заголовки: %v", r.Header)
+
 	var req scenarioRequest
 
 	//read json
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("❌ Scenario-service: ошибка декодирования JSON: %v", err)
 		http.Error(w, "Некорректный формат запроса", http.StatusBadRequest)
 		return
 	}
 
+	log.Printf("🔍 Scenario-service: запрос query = '%s'", req.Query)
+
 	//check request
 	if req.Query == "" {
+		log.Printf("❌ Scenario-service: пустой query")
 		http.Error(w, "Поле 'query' обязательно для заполнения", http.StatusBadRequest)
 		return
 	}
@@ -36,13 +44,18 @@ func (h *Handler) GetScenario(w http.ResponseWriter, r *http.Request) {
 	//get scenario
 	scenario, err := h.Service.GetScenario(context.Background(), req.Query)
 	if err != nil {
+		log.Printf("❌ Scenario-service: сценарий не найден для query '%s': %v", req.Query, err)
 		http.Error(w, "Сценарий не найден. Попробуйте изменить запрос", http.StatusNotFound)
 		return
 	}
 
+	log.Printf("✅ Scenario-service: найден сценарий '%s' для query '%s'", scenario.Title, req.Query)
+
 	//response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(scenario)
+
+	log.Printf("✅ Scenario-service: ответ отправлен успешно")
 }
 
 // POST Feedback

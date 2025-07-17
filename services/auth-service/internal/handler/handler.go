@@ -21,17 +21,9 @@ type RegisterRequest struct {
 	Email    string `json:"email" example:"user@example.com"`
 }
 
-type RegisterResponse struct {
-	Token string `json:"token" example:"jwt.token.here"`
-}
-
 type LoginRequest struct {
 	Phone    string `json:"phone" example:"+77001234567"`
 	Password string `json:"password" example:"MySecurePassword123"`
-}
-
-type LoginResponse struct {
-	Token string `json:"token" example:"jwt.token.here"`
 }
 
 type ErrorResponse struct {
@@ -49,12 +41,12 @@ func respondWithError(w http.ResponseWriter, code int, message string) {
 // Регистрация
 // Register godoc
 // @Summary Регистрация нового пользователя
-// @Description Создает нового пользователя и возвращает JWT токен
+// @Description Создает нового пользователя и возвращает JWT токен с данными пользователя
 // @Tags auth
 // @Accept json
 // @Produce json
 // @Param input body RegisterRequest true "Данные пользователя"
-// @Success 201 {object} RegisterResponse
+// @Success 201 {object} object
 // @Failure 400 {object} ErrorResponse
 // @Failure 409 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -76,36 +68,38 @@ func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Неверный формат телефона")
 		return
 	}
-	if len(req.Password) < 12 {
-		respondWithError(w, http.StatusBadRequest, "Пароль должен содержать минимум 12 символов")
+	if len(req.Password) < 6 {
+		respondWithError(w, http.StatusBadRequest, "Пароль должен содержать минимум 6 символов")
 		return
 	}
 
-	//JWT generation
-	tokenStr, err := h.Service.Register(req.Phone, req.Password)
+	//Вызов сервиса регистрации
+	authResponse, err := h.Service.Register(req.Phone, req.Password)
 	if err != nil {
 		log.Println("[Register] Service error:", err)
 		if strings.Contains(err.Error(), "пользователь с таким номером уже существует") {
-			respondWithError(w, http.StatusInternalServerError, "Ошибка регистрации пользователя")
+			respondWithError(w, http.StatusConflict, "Пользователь с таким номером уже существует")
 			return
 		}
+		respondWithError(w, http.StatusInternalServerError, "Ошибка регистрации пользователя")
+		return
 	}
 
 	//Response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(RegisterResponse{Token: tokenStr})
-
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(authResponse)
 }
 
 // Авторизация
 // Login godoc
 // @Summary Авторизация пользователя
-// @Description Принимает телефон и пароль, возвращает JWT токен
+// @Description Принимает телефон и пароль, возвращает JWT токен с данными пользователя
 // @Tags auth
 // @Accept json
 // @Produce json
 // @Param input body LoginRequest true "Данные входа"
-// @Success 200 {object} LoginResponse
+// @Success 200 {object} object
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -126,13 +120,17 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenStr, err := h.Service.Login(req.Phone, req.Password)
+	authResponse, err := h.Service.Login(req.Phone, req.Password)
 	if err != nil {
 		log.Println("[Login] Service error:", err)
-		respondWithError(w, http.StatusInternalServerError, "Ошибка генерации токена")
+		if strings.Contains(err.Error(), "неверный номер телефона или пароль") {
+			respondWithError(w, http.StatusUnauthorized, "Неверный номер телефона или пароль")
+			return
+		}
+		respondWithError(w, http.StatusInternalServerError, "Ошибка входа")
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(LoginResponse{Token: tokenStr})
+	json.NewEncoder(w).Encode(authResponse)
 }

@@ -46,7 +46,7 @@ services:
       - auth-service
     volumes:
       - ./services/scenario-service/migrations:/app/migrations
-    command: ["sh", "-c", "sleep 10 && echo '✅ Запускаем scenario-service...' && /app/scenario-service"]
+    command: ["./start.sh"]
     networks:
       - lunary-network
       

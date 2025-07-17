@@ -6,4 +6,4 @@ DROP INDEX IF EXISTS idx_scenarios_title;
 
 -- Удаляем таблицы
 DROP TABLE IF EXISTS steps;
-DROP TABLE IF EXISTS scenarios;
+DROP TABLE IF EXISTS scenarios; 

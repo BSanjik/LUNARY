@@ -7,7 +7,7 @@ class AdsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LUNARY'),
+        title: const Text('Объявления'),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),

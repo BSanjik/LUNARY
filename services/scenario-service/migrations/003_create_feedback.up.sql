@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS feedback (
 
 -- Индекс для быстрого поиска фидбека по сценарию
 CREATE INDEX IF NOT EXISTS idx_feedback_scenario_id ON feedback(scenario_id);
-CREATE INDEX IF NOT EXISTS idx_feedback_rating ON feedback(rating);
+CREATE INDEX IF NOT EXISTS idx_feedback_rating ON feedback(rating); 

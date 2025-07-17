@@ -22,7 +22,7 @@ RUN go build -o scenario-service ./cmd
 # Финальный образ
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates dos2unix libc6-compat
+RUN apk --no-cache add ca-certificates dos2unix libc6-compat bash
 
 WORKDIR /app
 
@@ -43,4 +43,4 @@ RUN dos2unix ./wait-for-it.sh ./start.sh && \
 
 EXPOSE 8082
 
-CMD ["./scenario-service"]
+CMD ["./start.sh"]

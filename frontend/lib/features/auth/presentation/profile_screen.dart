@@ -1,266 +1,206 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/providers/auth_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
+
+    // Отладочные логи
+    print('🔍 AuthState: isAuthenticated=${authState.isAuthenticated}');
+    print('🔍 User data: $user');
+    print('🔍 User phone: ${user?.phone}');
+    print('🔍 User email: ${user?.email}');
+
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text('Профиль'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // TODO: Настройки
-            },
-          ),
-        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Аватар и информация пользователя
-            _UserInfoCard(),
-            const SizedBox(height: 24),
-
-            // Статистика
-            _StatsCard(),
-            const SizedBox(height: 24),
-
-            // Меню действий
-            _MenuSection(),
-            const SizedBox(height: 24),
-
-            // Кнопка выхода
-            _LogoutButton(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _UserInfoCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            // Аватар
+            const CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.blue,
               child: Icon(
                 Icons.person,
-                size: 40,
-                color: Theme.of(context).primaryColor,
+                size: 50,
+                color: Colors.white,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
+            const SizedBox(height: 24),
+
+            // Информация о пользователе
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Информация',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Телефон
+                    Row(
+                      children: [
+                        const Icon(Icons.phone, color: Colors.grey),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Телефон',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            Text(
+                              user?.phone ?? 'Не указан',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    if (user?.email != null) ...[
+                      const SizedBox(height: 16),
+                      // Email
+                      Row(
+                        children: [
+                          const Icon(Icons.email, color: Colors.grey),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Email',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Text(
+                                user!.email!,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Настройки
+            Card(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Пользователь',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Настройки'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      // TODO: Переход к настройкам
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('В разработке')),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'user@example.com',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'На LUNARY с января 2024',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[500],
-                        ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.help),
+                    title: const Text('Помощь'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      // TODO: Переход к помощи
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('В разработке')),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                // TODO: Редактировать профиль
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
-class _StatsCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Статистика',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+            const Spacer(),
+
+            // Кнопка выхода
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: authState.isLoading
+                    ? null
+                    : () async {
+                        // Показываем диалог подтверждения
+                        final shouldLogout = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Выход'),
+                            content:
+                                const Text('Вы уверены, что хотите выйти?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
+                                child: const Text('Отмена'),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(true),
+                                child: const Text('Выйти'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (shouldLogout == true && context.mounted) {
+                          await ref.read(authProvider.notifier).logout();
+                          if (context.mounted) {
+                            context.go('/login');
+                          }
+                        }
+                      },
+                icon: authState.isLoading
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.logout),
+                label: const Text('Выйти'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
             ),
+
             const SizedBox(height: 16),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _StatItem(
-                  icon: Icons.list_alt,
-                  value: '5',
-                  label: 'Объявления',
-                ),
-                _StatItem(
-                  icon: Icons.favorite,
-                  value: '12',
-                  label: 'Избранные',
-                ),
-                _StatItem(
-                  icon: Icons.chat,
-                  value: '8',
-                  label: 'Сообщения',
-                ),
-              ],
-            ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-
-  const _StatItem({
-    required this.icon,
-    required this.value,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          size: 32,
-          color: Theme.of(context).primaryColor,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MenuSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: [
-          _MenuItem(
-            icon: Icons.history,
-            title: 'Мои объявления',
-            onTap: () {
-              // TODO: Мои объявления
-            },
-          ),
-          _MenuItem(
-            icon: Icons.notifications,
-            title: 'Уведомления',
-            onTap: () {
-              // TODO: Настройки уведомлений
-            },
-          ),
-          _MenuItem(
-            icon: Icons.help,
-            title: 'Помощь',
-            onTap: () {
-              // TODO: Справка
-            },
-          ),
-          _MenuItem(
-            icon: Icons.info,
-            title: 'О приложении',
-            onTap: () {
-              // TODO: О приложении
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MenuItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-
-  const _MenuItem({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-}
-
-class _LogoutButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () {
-          // TODO: Выход из аккаунта
-        },
-        icon: const Icon(Icons.logout, color: Colors.red),
-        label: const Text(
-          'Выйти из аккаунта',
-          style: TextStyle(color: Colors.red),
-        ),
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.red),
-          padding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),
     );

@@ -16,7 +16,7 @@ func (s *Storage) GetScenarioByText(ctx context.Context, query string) (*model.S
 	err := s.DB.QueryRowContext(ctx, `
 		SELECT id, title, category, description
 		FROM scenarios
-		WHERE title ILIKE '%' || $1 || '%' OR location ILIKE '%' || $1 || '%'
+		WHERE title ILIKE '%' || $1 || '%' OR description ILIKE '%' || $1 || '%' OR category ILIKE '%' || $1 || '%'
 		LIMIT 1
 	`, query).Scan(&scenario.ID, &scenario.Title, &scenario.Category, &scenario.Description)
 	if err != nil {
@@ -27,7 +27,7 @@ func (s *Storage) GetScenarioByText(ctx context.Context, query string) (*model.S
 		SELECT id, scenario_id, text, place, time, price
 		FROM steps
 		WHERE scenario_id = $1
-		ORDER BY time ASC
+		ORDER BY step_order ASC
 	`, scenario.ID)
 
 	if err != nil {
@@ -49,7 +49,7 @@ func (s *Storage) GetScenarioByText(ctx context.Context, query string) (*model.S
 
 func (s *Storage) SaveFeedback(ctx context.Context, feedback *model.FeedbackRequest) error {
 	_, err := s.DB.ExecContext(ctx, `
-		INSERT INTO feedback (scenario_id, rating, comment, user_login, created_at)
+		INSERT INTO feedback (scenario_id, rating, comment, user_email, created_at)
 		VALUES ($1, $2, $3, $4, NOW())
 	`, feedback.ScenarioID, feedback.Rating, feedback.Comment, feedback.UserLogin)
 

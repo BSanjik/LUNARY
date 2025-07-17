@@ -18,7 +18,7 @@ func NewServer(cfg *config.Config) *http.Server {
 	mux := http.NewServeMux()
 
 	// Маршруты, которые не требуют JWT
-	exempt := []string{"/auth/registration", "/auth/login"}
+	exempt := []string{"/auth/registration", "/auth/login", "/scenario/search"}
 
 	// Обёртываем proxy
 	proxyHandler := proxy.NewProxy(cfg.Services)

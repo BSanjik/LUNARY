@@ -8,14 +8,13 @@ class LunaryApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(appRouterProvider);
+    final router = ref.watch(goRouterProvider);
 
     return MaterialApp.router(
-      title: 'Lunary',
-      debugShowCheckedModeBanner: false,
+      title: 'LUNARY',
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
       routerConfig: router,
+      debugShowCheckedModeBanner: false,
     );
   }
 }

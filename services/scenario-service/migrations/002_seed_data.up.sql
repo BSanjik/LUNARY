@@ -22,4 +22,4 @@ INSERT INTO steps (scenario_id, text, place, time, price, step_order) VALUES
 
 -- Обновляем последовательности
 SELECT setval('scenarios_id_seq', 2);
-SELECT setval('steps_id_seq', 10);
+SELECT setval('steps_id_seq', 10); 

@@ -28,9 +28,9 @@ func main() {
 	h := &handler.Handler{Service: svc}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/scenario", h.GetScenario).Methods("POST")
+	r.HandleFunc("/search", h.GetScenario).Methods("POST")
 	r.HandleFunc("/feedback", h.SubmitFeedback).Methods("POST")
 
 	log.Printf("Scenario-service started on port %s", cfg.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, r))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+cfg.Port, r))
 }

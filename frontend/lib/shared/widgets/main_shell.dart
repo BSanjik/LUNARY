@@ -20,6 +20,8 @@ class MainShell extends StatelessWidget {
         unselectedItemColor: Colors.grey[600],
         backgroundColor: Colors.white,
         elevation: 8,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.list_alt),
