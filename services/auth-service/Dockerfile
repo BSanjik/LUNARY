@@ -3,8 +3,9 @@ FROM golang:1.23
 
 WORKDIR /app
 
-# Установка необходимых утилит
-RUN apt-get update && apt-get install -y curl wget tar
+# Установка необходимых утилит (включая curl для health checks)
+RUN apt-get update && apt-get install -y curl wget tar && \
+    rm -rf /var/lib/apt/lists/*
 
 # Скачивание и установка migrate
 RUN echo "📥 Скачиваем migrate..." && \

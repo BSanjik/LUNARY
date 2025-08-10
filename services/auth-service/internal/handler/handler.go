@@ -3,16 +3,16 @@ package handler
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
-	"regexp"
 	"strings"
 
 	"auth-service/internal/service"
+
+	"github.com/BSanjik/LUNARY/services/common/shared"
 )
 
 type Handler struct {
-	Service *service.AuthService
+	Service service.AuthServiceInterface
 }
 
 type RegisterRequest struct {
@@ -26,16 +26,33 @@ type LoginRequest struct {
 	Password string `json:"password" example:"MySecurePassword123"`
 }
 
-type ErrorResponse struct {
-	Message string `json:"message"`
+const maxRequestSize = 1 << 20 // 1MB
+
+// Простая функция для декодирования JSON
+func (h *Handler) decodeRequest(r *http.Request, dst interface{}) error {
+	// Лимит размера запроса
+	r.Body = http.MaxBytesReader(nil, r.Body, maxRequestSize)
+
+	if err := json.NewDecoder(r.Body).Decode(dst); err != nil {
+		return shared.NewValidationError("Неверный JSON")
+	}
+
+	// Применяем trim для строковых полей
+	h.trimStringFields(dst)
+
+	return nil
 }
 
-var phoneRegex = regexp.MustCompile(`^\+?[0-9]{10,15}$`)
-
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_ = json.NewEncoder(w).Encode(ErrorResponse{Message: message})
+func (h *Handler) trimStringFields(v interface{}) {
+	switch req := v.(type) {
+	case *RegisterRequest:
+		req.Phone = strings.TrimSpace(req.Phone)
+		req.Password = strings.TrimSpace(req.Password)
+		req.Email = strings.TrimSpace(req.Email)
+	case *LoginRequest:
+		req.Phone = strings.TrimSpace(req.Phone)
+		req.Password = strings.TrimSpace(req.Password)
+	}
 }
 
 // Регистрация
@@ -53,39 +70,18 @@ func respondWithError(w http.ResponseWriter, code int, message string) {
 // @Router /register [post]
 func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println("[Register] Ошибка декодирования JSON:", err)
-		respondWithError(w, http.StatusBadRequest, "Неверный JSON")
+
+	if err := h.decodeRequest(r, &req); err != nil {
+		shared.WriteErrorResponse(w, err)
 		return
 	}
 
-	req.Phone = strings.TrimSpace(req.Phone)
-	req.Password = strings.TrimSpace(req.Password)
-	req.Email = strings.TrimSpace(req.Email)
-
-	//phone and pass validation
-	if !phoneRegex.MatchString(req.Phone) {
-		respondWithError(w, http.StatusBadRequest, "Неверный формат телефона")
-		return
-	}
-	if len(req.Password) < 6 {
-		respondWithError(w, http.StatusBadRequest, "Пароль должен содержать минимум 6 символов")
-		return
-	}
-
-	//Вызов сервиса регистрации
 	authResponse, err := h.Service.Register(req.Phone, req.Password)
 	if err != nil {
-		log.Println("[Register] Service error:", err)
-		if strings.Contains(err.Error(), "пользователь с таким номером уже существует") {
-			respondWithError(w, http.StatusConflict, "Пользователь с таким номером уже существует")
-			return
-		}
-		respondWithError(w, http.StatusInternalServerError, "Ошибка регистрации пользователя")
+		shared.WriteErrorResponse(w, err)
 		return
 	}
 
-	//Response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(authResponse)
@@ -106,28 +102,15 @@ func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 // @Router /login [post]
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println("[Login] Ошибка декодирования JSON:", err)
-		respondWithError(w, http.StatusBadRequest, "Неверный JSON")
-		return
-	}
 
-	req.Phone = strings.TrimSpace(req.Phone)
-	req.Password = strings.TrimSpace(req.Password)
-
-	if !phoneRegex.MatchString(req.Phone) {
-		respondWithError(w, http.StatusBadRequest, "Неверный формат телефона")
+	if err := h.decodeRequest(r, &req); err != nil {
+		shared.WriteErrorResponse(w, err)
 		return
 	}
 
 	authResponse, err := h.Service.Login(req.Phone, req.Password)
 	if err != nil {
-		log.Println("[Login] Service error:", err)
-		if strings.Contains(err.Error(), "неверный номер телефона или пароль") {
-			respondWithError(w, http.StatusUnauthorized, "Неверный номер телефона или пароль")
-			return
-		}
-		respondWithError(w, http.StatusInternalServerError, "Ошибка входа")
+		shared.WriteErrorResponse(w, err)
 		return
 	}
 
