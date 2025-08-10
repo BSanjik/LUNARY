@@ -57,6 +57,15 @@ func NewInternalError(message string) *AppError {
 	}
 }
 
+// NewRateLimitError создаёт ошибку превышения лимита запросов
+func NewRateLimitError(message string) *AppError {
+	return &AppError{
+		Code:       "RATE_LIMIT_ERROR",
+		Message:    message,
+		HTTPStatus: http.StatusTooManyRequests,
+	}
+}
+
 // Функция для отправки ошибки в HTTP ответе
 func WriteErrorResponse(w http.ResponseWriter, err error) {
 	if appErr, ok := err.(*AppError); ok {

@@ -34,9 +34,9 @@
 
 | Сервис | Порт | Описание | Статус |
 |--------|------|----------|---------|
-| **api-gateway** | 8080 | Единая точка входа, маршрутизация | ✅ Ready |
+| **api-gateway** | 8080 | Единая точка входа, маршрутизация | ✅ Production |
 | **auth-service** | 8081 | Регистрация, авторизация, JWT | ✅ Production |
-| **scenario-service** | 8082 | Управление сценариями | ✅ Ready |
+| **scenario-service** | 8082 | Управление сценариями, отзывы | ✅ Production |
 | **user-service** | 8083 | Профили пользователей | 🚧 In Progress |
 | **ad-service** | 8084 | Создание и поиск объявлений | 🚧 In Progress |
 | **media-service** | 8085 | Загрузка медиафайлов | 🚧 In Progress |
@@ -66,6 +66,8 @@
 - **Logrus** - структурированное логирование
 - **GORM** - ORM для работы с БД
 - **go-playground/validator** - валидация запросов
+- **testify** - unit тестирование
+- **go-sqlmock** - мокирование базы данных
 
 ### Frontend
 - **React Native 0.72+** - мобильное приложение
@@ -184,13 +186,27 @@ curl -X POST http://localhost:8081/api/v1/registration \
 | GET | `/health/ready` | Готовность к работе |
 | GET | `/swagger/` | API документация |
 
+### API Gateway (8080)
+
+| Method | Endpoint | Описание |
+|--------|----------|----------|
+| POST | `/auth/registration` | Проксирует в auth-service |
+| POST | `/auth/login` | Проксирует в auth-service |
+| POST | `/scenario/search` | Проксирует в scenario-service |
+| POST | `/scenario/feedback` | Проксирует в scenario-service |
+| GET | `/health` | Детальное состояние API Gateway |
+| GET | `/health/live` | Проверка "живости" |
+| GET | `/health/ready` | Готовность к работе |
+
 ### Scenario Service (8082)
 
 | Method | Endpoint | Описание |
 |--------|----------|----------|
-| GET | `/api/v1/scenarios` | Список сценариев |
-| GET | `/api/v1/scenarios/{id}` | Получение сценария |
-| POST | `/api/v1/scenarios/{id}/feedback` | Отправка отзыва |
+| POST | `/search` | Поиск сценариев по ключевым словам |
+| POST | `/feedback` | Отправка отзыва о сценарии |
+| GET | `/health` | Детальное состояние сервиса |
+| GET | `/health/live` | Проверка "живости" |
+| GET | `/health/ready` | Готовность к работе |
 
 ---
 
@@ -263,7 +279,7 @@ LUNARY/
 │   │   └── shared/          # Логирование, ошибки, health checks
 │   ├── auth-service/        # ✅ Готов к продакшену
 │   ├── scenario-service/    # ✅ Готов к продакшену
-│   ├── api-gateway/         # 🚧 В разработке
+│   ├── api-gateway/         # ✅ Готов к продакшену
 │   └── .../                 # Остальные сервисы
 ├── 📄 init.sql              # Схема базы данных
 ├── 📄 docker-compose.yml    # Локальная разработка
@@ -403,23 +419,26 @@ git push -u origin feature/task-name
 
 ### ✅ Реализовано
 
-- **Unit Tests** - полное покрытие бизнес-логики
-- **Error Handling** - структурированные ошибки с кодами
-- **Request Validation** - валидация с детальными сообщениями
-- **Structured Logging** - JSON логи с метаданными
-- **Health Checks** - liveness, readiness, detailed monitoring
-- **Graceful Shutdown** - корректное завершение сервисов
+- **Unit Tests** - полное покрытие бизнес-логики с go-sqlmock и testify
+- **Error Handling** - структурированные ошибки с кодами и русскими сообщениями
+- **Request Validation** - валидация с go-playground/validator и детальными сообщениями
+- **Structured Logging** - JSON логи с logrus, метаданными и контекстом (request_id, user_id)
+- **Health Checks** - liveness, readiness, detailed monitoring для всех сервисов
+- **Graceful Shutdown** - корректное завершение с обработкой активных соединений
+- **API Gateway** - JWT middleware, rate limiting, metrics, русские ошибки
+- **JWT Authentication** - полная валидация токенов с exp, алгоритмами подписи
+- **Request Tracing** - уникальные request_id для отслеживания запросов
 - **API Documentation** - Swagger спецификация
-- **Containerization** - Docker images для всех сервисов
+- **Containerization** - Docker images с health checks для всех сервисов
 - **Database Migrations** - версионирование схемы БД
 
 ### 🚧 В планах
 
-- **Rate Limiting** - ограничение количества запросов
 - **Circuit Breaker** - защита от каскадных сбоев
-- **Distributed Tracing** - трассировка запросов
+- **Distributed Tracing** - расширенная трассировка запросов
 - **Metrics Collection** - сбор метрик для Prometheus
 - **CI/CD Pipeline** - автоматическое тестирование и деплой
+- **Message Queues** - асинхронная обработка уведомлений
 
 ---
 

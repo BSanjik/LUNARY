@@ -4,14 +4,16 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"scenario-service/internal/model"
 	"scenario-service/internal/service"
+	"strings"
+
+	"github.com/BSanjik/LUNARY/services/common/shared"
 )
 
 type Handler struct {
-	Service *service.ScenarioService
+	Service service.ScenarioServiceInterface
 }
 
 type scenarioRequest struct {
@@ -20,65 +22,59 @@ type scenarioRequest struct {
 
 // POST Scenario
 func (h *Handler) GetScenario(w http.ResponseWriter, r *http.Request) {
-	log.Printf("🔍 Scenario-service: получен запрос %s %s", r.Method, r.URL.Path)
-	log.Printf("🔍 Scenario-service: заголовки: %v", r.Header)
-
 	var req scenarioRequest
 
-	//read json
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Printf("❌ Scenario-service: ошибка декодирования JSON: %v", err)
-		http.Error(w, "Некорректный формат запроса", http.StatusBadRequest)
+	// Декодирование JSON
+	if err := h.decodeRequest(r, &req); err != nil {
+		shared.WriteErrorResponse(w, shared.NewValidationError("Некорректный формат запроса"))
 		return
 	}
 
-	log.Printf("🔍 Scenario-service: запрос query = '%s'", req.Query)
+	// Очистка входных данных
+	h.trimStringFields(&req)
 
-	//check request
-	if req.Query == "" {
-		log.Printf("❌ Scenario-service: пустой query")
-		http.Error(w, "Поле 'query' обязательно для заполнения", http.StatusBadRequest)
-		return
-	}
-
-	//get scenario
-	scenario, err := h.Service.GetScenario(context.Background(), req.Query)
+	// Поиск сценариев через сервис (валидация внутри)
+	scenario, err := h.Service.SearchScenarios(context.Background(), req.Query)
 	if err != nil {
-		log.Printf("❌ Scenario-service: сценарий не найден для query '%s': %v", req.Query, err)
-		http.Error(w, "Сценарий не найден. Попробуйте изменить запрос", http.StatusNotFound)
+		shared.WriteErrorResponse(w, err)
 		return
 	}
 
-	log.Printf("✅ Scenario-service: найден сценарий '%s' для query '%s'", scenario.Title, req.Query)
-
-	//response
+	// Успешный ответ
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(scenario)
-
-	log.Printf("✅ Scenario-service: ответ отправлен успешно")
 }
 
 // POST Feedback
 func (h *Handler) SubmitFeedback(w http.ResponseWriter, r *http.Request) {
 	var req model.FeedbackRequest
 
-	//read json
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Некорректный формат данных", http.StatusBadRequest)
+	// Декодирование JSON
+	if err := h.decodeRequest(r, &req); err != nil {
+		shared.WriteErrorResponse(w, shared.NewValidationError("Некорректный формат данных"))
 		return
 	}
 
-	// Сохраняем фидбек
+	// Сохранение фидбека через сервис (валидация внутри)
 	if err := h.Service.SubmitFeedback(context.Background(), &req); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		shared.WriteErrorResponse(w, err)
 		return
 	}
 
-	//response
+	// Успешный ответ
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
 		"status":  "success",
-		"message": "Feedback submitted successfully",
+		"message": "Отзыв успешно сохранён",
 	})
+}
+
+// Вспомогательные функции
+func (h *Handler) decodeRequest(r *http.Request, target interface{}) error {
+	return json.NewDecoder(r.Body).Decode(target)
+}
+
+func (h *Handler) trimStringFields(req *scenarioRequest) {
+	req.Query = strings.TrimSpace(req.Query)
 }

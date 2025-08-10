@@ -200,9 +200,10 @@ func (h *HealthManager) ReadinessHandler(w http.ResponseWriter, r *http.Request)
 	healthResponse := h.RunChecks()
 
 	status := http.StatusOK
-	if healthResponse.Status == StatusUnhealthy {
+	switch healthResponse.Status {
+	case StatusUnhealthy:
 		status = http.StatusServiceUnavailable
-	} else if healthResponse.Status == StatusDegraded {
+	case StatusDegraded:
 		status = http.StatusOK // Или можно использовать 207 Multi-Status
 	}
 

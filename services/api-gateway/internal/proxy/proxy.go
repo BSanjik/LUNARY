@@ -1,11 +1,13 @@
 package proxy
 
 import (
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"time"
+
+	"github.com/BSanjik/LUNARY/services/common/shared"
 )
 
 type Proxy struct {
@@ -17,33 +19,44 @@ func NewProxy(services map[string]string) *Proxy {
 }
 
 func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("🔍 Proxy: получен запрос %s %s", r.Method, r.URL.Path)
+	start := time.Now()
+
+	shared.LogInfo("Входящий запрос", map[string]interface{}{
+		"method":      r.Method,
+		"path":        r.URL.Path,
+		"remote_addr": r.RemoteAddr,
+	})
 
 	pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	log.Printf("🔍 Proxy: pathParts = %v", pathParts)
 
 	if len(pathParts) == 0 {
-		log.Printf("❌ Proxy: пустой путь")
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		shared.LogWarn("Пустой путь в запросе", map[string]interface{}{
+			"path":        r.URL.Path,
+			"remote_addr": r.RemoteAddr,
+		})
+		shared.WriteErrorResponse(w, shared.NewValidationError("Некорректный путь запроса"))
 		return
 	}
 
 	service := pathParts[0]
-	log.Printf("🔍 Proxy: service = '%s'", service)
-
 	backend, ok := p.Services[service]
 	if !ok {
-		log.Printf("❌ Proxy: сервис '%s' не найден в списке: %v", service, p.Services)
-		http.Error(w, "Service Not Found", http.StatusNotFound)
+		shared.LogWarn("Сервис не найден", map[string]interface{}{
+			"service":            service,
+			"available_services": getServiceNames(p.Services),
+			"path":               r.URL.Path,
+		})
+		shared.WriteErrorResponse(w, shared.NewNotFoundError("Сервис не найден"))
 		return
 	}
 
-	log.Printf("🔍 Proxy: backend = '%s'", backend)
-
 	backendURl, err := url.Parse(backend)
 	if err != nil {
-		log.Printf("❌ Proxy: ошибка парсинга URL '%s': %v", backend, err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		shared.LogWarn("Ошибка парсинга URL бэкенда", map[string]interface{}{
+			"backend": backend,
+			"servoce": service,
+		})
+		shared.WriteErrorResponse(w, shared.NewNotFoundError("Внутренняя ошибка сервера"))
 		return
 	}
 
@@ -51,10 +64,29 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.URL.Path = "/" + strings.Join(pathParts[1:], "/")
 	r.Host = backendURl.Host
 
-	log.Printf("🔍 Proxy: перенаправляем %s → %s%s", originalPath, backend, r.URL.Path)
+	shared.LogInfo("Перенаправление запроса", map[string]interface{}{
+		"original_path": originalPath,
+		"new_path":      r.URL.Path,
+		"backend":       backend,
+		"service":       service,
+	})
 
 	proxy := httputil.NewSingleHostReverseProxy(backendURl)
 	proxy.ServeHTTP(w, r)
 
-	log.Printf("✅ Proxy: запрос обработан")
+	duration := time.Since(start)
+	shared.LogInfo("Запрос обработан", map[string]interface{}{
+		"service":     service,
+		"duration_ms": duration.Milliseconds(),
+		"backend":     backend,
+	})
+}
+
+// Вспомогательная функция для логирования списка сервисов
+func getServiceNames(services map[string]string) []string {
+	names := make([]string, 0, len(services))
+	for name := range services {
+		names = append(names, name)
+	}
+	return names
 }

@@ -1,5 +1,5 @@
 # Dockerfile для API Gateway (Go)
-FROM golang:1.23
+FROM golang:1.23 AS builder
 
 WORKDIR /app
 
@@ -13,8 +13,22 @@ COPY . .
 # Собираем бинарник
 RUN go build -o api-gateway ./cmd
 
-# Устанавливаем порт (если используется, не обязательно)
+# Финальный образ
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates curl
+
+WORKDIR /app
+
+# Копируем бинарник
+COPY --from=builder /app/api-gateway .
+
+# Устанавливаем порт
 EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
 
 # Запуск
 CMD ["./api-gateway"]

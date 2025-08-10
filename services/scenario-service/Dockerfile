@@ -22,7 +22,7 @@ RUN go build -o scenario-service ./cmd
 # Финальный образ
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates dos2unix libc6-compat bash
+RUN apk --no-cache add ca-certificates dos2unix libc6-compat bash curl
 
 WORKDIR /app
 

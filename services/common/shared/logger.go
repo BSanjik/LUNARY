@@ -70,6 +70,41 @@ func WithFields(fields logrus.Fields) *logrus.Entry {
 	return Logger.WithFields(fields)
 }
 
+// WithRequestID добавляет request ID в контекст
+func WithRequestID(ctx context.Context, requestID string) context.Context {
+	return context.WithValue(ctx, RequestIDKey, requestID)
+}
+
+// WithUserID добавляет user ID в контекст
+func WithUserID(ctx context.Context, userID string) context.Context {
+	return context.WithValue(ctx, UserIDKey, userID)
+}
+
+// WithService добавляет имя сервиса в контекст
+func WithService(ctx context.Context, serviceName string) context.Context {
+	return context.WithValue(ctx, ServiceKey, serviceName)
+}
+
+// GetRequestID извлекает request ID из контекста
+func GetRequestID(ctx context.Context) string {
+	if requestID := ctx.Value(RequestIDKey); requestID != nil {
+		if id, ok := requestID.(string); ok {
+			return id
+		}
+	}
+	return ""
+}
+
+// GetUserID извлекает user ID из контекста
+func GetUserID(ctx context.Context) string {
+	if userID := ctx.Value(UserIDKey); userID != nil {
+		if id, ok := userID.(string); ok {
+			return id
+		}
+	}
+	return ""
+}
+
 // Быстрые методы для часто используемых случаев
 func LogInfo(msg string, fields ...logrus.Fields) {
 	if len(fields) > 0 {
@@ -77,6 +112,36 @@ func LogInfo(msg string, fields ...logrus.Fields) {
 	} else {
 		Logger.Info(msg)
 	}
+}
+
+// LogInfoWithContext логирует с автоматическим добавлением полей из контекста
+func LogInfoWithContext(ctx context.Context, msg string, fields ...logrus.Fields) {
+	entry := WithContext(ctx)
+	if len(fields) > 0 {
+		entry = entry.WithFields(fields[0])
+	}
+	entry.Info(msg)
+}
+
+// LogErrorWithContext логирует ошибку с контекстом
+func LogErrorWithContext(ctx context.Context, err error, msg string, fields ...logrus.Fields) {
+	entry := WithContext(ctx)
+	if err != nil {
+		entry = entry.WithField("error", err.Error())
+	}
+	if len(fields) > 0 {
+		entry = entry.WithFields(fields[0])
+	}
+	entry.Error(msg)
+}
+
+// LogWarnWithContext логирует предупреждение с контекстом
+func LogWarnWithContext(ctx context.Context, msg string, fields ...logrus.Fields) {
+	entry := WithContext(ctx)
+	if len(fields) > 0 {
+		entry = entry.WithFields(fields[0])
+	}
+	entry.Warn(msg)
 }
 
 func LogError(err error, msg string, fields ...logrus.Fields) {

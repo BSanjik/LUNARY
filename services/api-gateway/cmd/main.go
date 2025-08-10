@@ -2,21 +2,29 @@
 package main
 
 import (
-	"log"
+	"time"
 
 	"api-gateway/internal"
 	"api-gateway/internal/config"
+
+	"github.com/BSanjik/LUNARY/services/common/shared"
 )
 
 func main() {
+	shared.InitLogger("api-gateway", "info")
+
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		shared.LogError(err, "Не удалось загрузить конфигурацию")
+		return
 	}
 
-	srv := internal.NewServer(cfg)
-	log.Printf("API Gateway started at %s\n", cfg.ListnerAddr)
-	if err := srv.ListenAndServe(); err != nil {
-		log.Fatalf("Server error: %v", err)
-	}
+	healthManager := shared.NewHealthManager("api-gateway", "1.0.0")
+
+	srv := internal.NewServer(cfg, healthManager)
+
+	graceful := shared.NewGracefulShutdown(srv, 30*time.Second)
+
+	shared.LogInfo("API Gateway запущен на " + cfg.ListnerAddr)
+	graceful.Start()
 }

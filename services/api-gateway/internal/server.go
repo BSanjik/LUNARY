@@ -9,13 +9,19 @@ import (
 	"api-gateway/internal/middleware"
 	"api-gateway/internal/proxy"
 
+	"github.com/BSanjik/LUNARY/services/common/shared"
 	"golang.org/x/time/rate"
 )
 
-func NewServer(cfg *config.Config) *http.Server {
+func NewServer(cfg *config.Config, healthManager *shared.HealthManager) *http.Server {
 	limiter := rate.NewLimiter(5, 10)
 
 	mux := http.NewServeMux()
+
+	// Health check endpoints
+	mux.HandleFunc("/health", healthManager.HealthHandler)
+	mux.HandleFunc("/health/live", healthManager.LivenessHandler)
+	mux.HandleFunc("/health/ready", healthManager.ReadinessHandler)
 
 	// Маршруты, которые не требуют JWT
 	exempt := []string{"/auth/registration", "/auth/login", "/scenario/search"}
@@ -24,10 +30,14 @@ func NewServer(cfg *config.Config) *http.Server {
 	proxyHandler := proxy.NewProxy(cfg.Services)
 
 	// Оборачиваем middleware
-	handler := middleware.LoggingMiddleware(
-		middleware.RateLimitMiddleware(limiter)(
-			middleware.JWTMiddleware([]byte(cfg.JWTSecret), exempt)(
-				proxyHandler,
+	handler := middleware.RequestIDMiddleware()(
+		middleware.MetricsMiddleware()(
+			middleware.LoggingMiddleware(
+				middleware.RateLimitMiddleware(limiter)(
+					middleware.JWTMiddleware([]byte(cfg.JWTSecret), exempt)(
+						proxyHandler,
+					),
+				),
 			),
 		),
 	)
