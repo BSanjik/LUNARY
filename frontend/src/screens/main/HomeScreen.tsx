@@ -12,7 +12,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {theme} from '@constants/theme';
 import type {RootState} from '@store/index';
-import type {MainTabScreenProps} from '@types/navigation';
+import type {MainTabScreenProps} from '../../types/navigation';
+import {ApiTest, checkBackendHealth} from '../../utils/apiTest';
 
 export const HomeScreen: React.FC<MainTabScreenProps<'Home'>> = ({navigation}) => {
   const {user} = useSelector((state: RootState) => state.auth);
@@ -38,6 +39,17 @@ export const HomeScreen: React.FC<MainTabScreenProps<'Home'>> = ({navigation}) =
       icon: 'settings',
       color: theme.colors.info,
       onPress: () => navigation.navigate('Settings'),
+    },
+    {
+      title: 'Тест API',
+      description: 'Проверить подключение к backend',
+      icon: 'api',
+      color: theme.colors.error,
+      onPress: async () => {
+        console.log('🧪 Запускаем тест API...');
+        await checkBackendHealth();
+        await ApiTest.runFullTest();
+      },
     },
   ];
 

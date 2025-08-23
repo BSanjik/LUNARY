@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {logoutUser} from '@store/slices/authSlice';
 import {theme} from '@constants/theme';
 import type {AppDispatch, RootState} from '@store/index';
-import type {MainTabScreenProps} from '@types/navigation';
+import type {MainTabScreenProps} from '../../types/navigation';
 
 export const ProfileScreen: React.FC<MainTabScreenProps<'Profile'>> = () => {
   const dispatch = useDispatch<AppDispatch>();

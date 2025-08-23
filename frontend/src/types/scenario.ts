@@ -2,9 +2,11 @@ export interface Scenario {
   id: number;
   title: string;
   description: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  estimated_time: number;
-  is_active: boolean;
+  category: string;
+  duration: string;
+  participants: string;
+  budget: string;
+  checklist: string[];
   created_at: string;
 }
 
@@ -28,8 +30,10 @@ export interface Feedback {
 }
 
 export interface FeedbackRequest {
+  scenario_id: number;
   rating: number;
   comment?: string;
+  user_login: string;
 }
 
 export interface ScenarioState {
@@ -38,4 +42,15 @@ export interface ScenarioState {
   steps: Step[];
   isLoading: boolean;
   error: string | null;
+}
+
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: string;
+}
+
+export interface ApiResponse<T = any> {
+  data?: T;
+  error?: ApiError;
 }

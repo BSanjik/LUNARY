@@ -1,7 +1,4 @@
 {
   "name": "LunaryMobile",
-  "displayName": "LUNARY",
-  "react": {
-    "jsEngine": "hermes"
-  }
+  "displayName": "LunaryMobile"
 }

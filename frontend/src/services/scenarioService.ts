@@ -1,38 +1,47 @@
 import {apiService} from './api';
-import {ENDPOINTS} from '@constants/api';
+import {ENDPOINTS, API_CONFIG} from '@constants/api';
 import type {
   Scenario,
   Step,
   Feedback,
   FeedbackRequest,
   ApiResponse,
-} from '@types/scenario';
+} from '../types/scenario';
+
+interface ScenarioSearchRequest {
+  query: string;
+}
 
 class ScenarioService {
-  // Get all scenarios
-  public async getScenarios(): Promise<ApiResponse<Scenario[]>> {
-    return apiService.get<Scenario[]>(ENDPOINTS.SCENARIOS.LIST);
-  }
-
-  // Get scenario by ID
-  public async getScenario(id: number): Promise<ApiResponse<Scenario>> {
-    const url = ENDPOINTS.SCENARIOS.DETAIL.replace(':id', id.toString());
-    return apiService.get<Scenario>(url);
-  }
-
-  // Get scenario steps
-  public async getScenarioSteps(scenarioId: number): Promise<ApiResponse<Step[]>> {
-    const url = ENDPOINTS.SCENARIOS.STEPS.replace(':id', scenarioId.toString());
-    return apiService.get<Step[]>(url);
+  // Search scenarios by query
+  public async searchScenarios(query: string): Promise<ApiResponse<Scenario>> {
+    const searchData: ScenarioSearchRequest = { query };
+    return apiService.post<Scenario>(ENDPOINTS.SCENARIOS.SEARCH, searchData);
   }
 
   // Submit feedback for scenario
   public async submitFeedback(
-    scenarioId: number,
     feedback: FeedbackRequest,
-  ): Promise<ApiResponse<Feedback>> {
-    const url = ENDPOINTS.SCENARIOS.FEEDBACK.replace(':id', scenarioId.toString());
-    return apiService.post<Feedback>(url, feedback);
+  ): Promise<ApiResponse<{status: string; message: string}>> {
+    return apiService.post<{status: string; message: string}>(
+      ENDPOINTS.SCENARIOS.FEEDBACK, 
+      feedback
+    );
+  }
+
+  // Direct API calls to scenario service (для тестирования)
+  public async directSearchScenarios(query: string): Promise<ApiResponse<Scenario>> {
+    const searchData: ScenarioSearchRequest = { query };
+    return apiService.post<Scenario>(`${API_CONFIG.DEV_SCENARIO_URL}/search`, searchData);
+  }
+
+  public async directSubmitFeedback(
+    feedback: FeedbackRequest,
+  ): Promise<ApiResponse<{status: string; message: string}>> {
+    return apiService.post<{status: string; message: string}>(
+      `${API_CONFIG.DEV_SCENARIO_URL}/feedback`, 
+      feedback
+    );
   }
 
   // Validate feedback rating

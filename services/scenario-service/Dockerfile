@@ -1,10 +1,11 @@
 # Сборка
-FROM golang:1.23 AS builder
+FROM golang:1.24 AS builder
 
-WORKDIR /app
+WORKDIR /app/scenario-service
 
-# Копируем зависимости
-COPY go.mod ./
+# Копируем структуру проекта
+COPY scenario-service/go.mod ./
+COPY common ../common
 RUN go mod tidy && go mod download
 
 # Скачиваем migrate
@@ -13,10 +14,10 @@ RUN wget https://github.com/golang-migrate/migrate/releases/download/v4.16.2/mig
     mv migrate /usr/local/bin/
 
 # Копируем миграции
-COPY migrations/ ./migrations/
+COPY scenario-service/migrations/ ./migrations/
 
 # Копируем исходники и собираем
-COPY . .
+COPY scenario-service .
 RUN go build -o scenario-service ./cmd
 
 # Финальный образ
@@ -27,15 +28,15 @@ RUN apk --no-cache add ca-certificates dos2unix libc6-compat bash curl
 WORKDIR /app
 
 # Копируем бинарник и migrate
-COPY --from=builder /app/scenario-service .
+COPY --from=builder /app/scenario-service/scenario-service .
 COPY --from=builder /usr/local/bin/migrate /usr/local/bin/
 
 # Копируем миграции
-COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/scenario-service/migrations ./migrations
 
 # Копируем скрипты
-COPY --from=builder /app/wait-for-it.sh .
-COPY --from=builder /app/start.sh .
+COPY --from=builder /app/scenario-service/wait-for-it.sh .
+COPY --from=builder /app/scenario-service/start.sh .
 
 # Конвертируем окончания строк и даем права
 RUN dos2unix ./wait-for-it.sh ./start.sh && \

@@ -26,6 +26,11 @@ type LoginRequest struct {
 	Password string `json:"password" example:"MySecurePassword123"`
 }
 
+// ErrorResponse структура для Swagger документации
+type ErrorResponse struct {
+	Error shared.AppError `json:"error"`
+}
+
 const maxRequestSize = 1 << 20 // 1MB
 
 // Простая функция для декодирования JSON

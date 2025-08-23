@@ -6,9 +6,9 @@ export interface User {
 }
 
 export interface AuthResponse {
-  message: string;
-  token: string;
-  user: User;
+  access_token: string;
+  user_id: number;
+  expires_at: string;
 }
 
 export interface LoginRequest {

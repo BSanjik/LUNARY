@@ -12,7 +12,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import {theme} from '@constants/theme';
-import type {MainTabScreenProps} from '@types/navigation';
+import type {MainTabScreenProps} from '../../types/navigation';
 
 export const SettingsScreen: React.FC<MainTabScreenProps<'Settings'>> = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);

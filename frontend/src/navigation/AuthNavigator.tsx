@@ -4,7 +4,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {LoginScreen} from '@screens/auth/LoginScreen';
 import {RegisterScreen} from '@screens/auth/RegisterScreen';
 import {theme} from '@constants/theme';
-import type {AuthStackParamList} from '@types/navigation';
+import type {AuthStackParamList} from '../types/navigation';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 

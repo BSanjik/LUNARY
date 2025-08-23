@@ -2,10 +2,10 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {useSelector} from 'react-redux';
 
-import {RootState} from '@store/index';
+import {RootState} from '../store/index';
 import {AuthNavigator} from './AuthNavigator';
 import {MainNavigator} from './MainNavigator';
-import type {RootStackParamList} from '@types/navigation';
+import type {RootStackParamList} from '../types/navigation';
 
 const Stack = createStackNavigator<RootStackParamList>();
 

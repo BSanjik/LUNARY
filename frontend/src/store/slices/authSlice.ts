@@ -7,7 +7,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   ApiError,
-} from '@types/auth';
+} from '../../types/auth';
 
 // Initial state
 const initialState: AuthState = {

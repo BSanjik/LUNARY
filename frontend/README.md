@@ -1,254 +1,97 @@
-# LUNARY Mobile App (React Native)
+This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-Мобильное приложение LUNARY, построенное на React Native с TypeScript.
+# Getting Started
 
-## 🚀 Технологии
+> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
-- **React Native 0.72** - кроссплатформенная разработка
-- **TypeScript** - типизированный JavaScript
-- **Redux Toolkit** - управление состоянием
-- **React Navigation 6** - навигация между экранами
-- **React Hook Form** - управление формами
-- **Axios** - HTTP клиент
-- **React Native Paper** - UI компоненты
-- **Vector Icons** - иконки
+## Step 1: Start Metro
 
-## 📁 Структура проекта
+First, you will need to run **Metro**, the JavaScript build tool for React Native.
 
-```
-frontend/
-├── src/
-│   ├── components/       # Переиспользуемые компоненты
-│   ├── screens/         # Экраны приложения
-│   │   ├── auth/        # Экраны аутентификации
-│   │   └── main/        # Основные экраны
-│   ├── navigation/      # Навигация
-│   ├── services/        # API сервисы
-│   ├── store/          # Redux store и slices
-│   ├── types/          # TypeScript типы
-│   ├── constants/      # Константы (тема, API)
-│   └── utils/          # Утилиты
-├── assets/             # Изображения и иконки
-├── android/           # Android конфигурация
-├── ios/              # iOS конфигурация
-└── package.json      # Зависимости и scripts
-```
+To start the Metro dev server, run the following command from the root of your React Native project:
 
-## 🛠️ Установка и запуск
-
-### Требования
-- Node.js 16+
-- React Native CLI
-- Android Studio (для Android)
-- Xcode (для iOS, только macOS)
-
-### Установка зависимостей
-```bash
-cd frontend
-npm install
-
-# Для iOS (только macOS)
-cd ios && pod install && cd ..
-```
-
-### Запуск Metro bundler
-```bash
+```sh
+# Using npm
 npm start
+
+# OR using Yarn
+yarn start
 ```
 
-### Запуск на устройстве
-```bash
-# Android
+## Step 2: Build and run your app
+
+With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+
+### Android
+
+```sh
+# Using npm
 npm run android
 
-# iOS (только macOS)
+# OR using Yarn
+yarn android
+```
+
+### iOS
+
+For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+
+The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+
+```sh
+bundle install
+```
+
+Then, and every time you update your native dependencies, run:
+
+```sh
+bundle exec pod install
+```
+
+For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+
+```sh
+# Using npm
 npm run ios
+
+# OR using Yarn
+yarn ios
 ```
 
-## 🏗️ Архитектура
+If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
 
-### State Management (Redux Toolkit)
-- **authSlice** - управление аутентификацией
-- **scenarioSlice** - управление сценариями
-- Persist для сохранения auth состояния
+This is one way to run your app — you can also build it directly from Android Studio or Xcode.
 
-### Navigation (React Navigation)
-- **AuthNavigator** - экраны входа/регистрации
-- **MainNavigator** - основные экраны с tab navigation
-- **AppNavigator** - корневая навигация
+## Step 3: Modify your app
 
-### API Integration
-- **apiService** - базовый HTTP клиент с interceptors
-- **authService** - методы аутентификации
-- **scenarioService** - методы работы со сценариями
+Now that you have successfully run the app, let's make changes!
 
-## 📱 Экраны
+Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
 
-### Аутентификация
-- **LoginScreen** - вход в систему
-- **RegisterScreen** - регистрация пользователя
+When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
 
-### Основные экраны
-- **HomeScreen** - главная с статистикой
-- **ScenariosScreen** - список сценариев
-- **ProfileScreen** - профиль пользователя
-- **SettingsScreen** - настройки приложения
+- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
+- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
 
-## 🎨 Дизайн система
+## Congratulations! :tada:
 
-### Цветовая палитра
-```typescript
-colors: {
-  primary: '#6366F1',      // Основной цвет
-  secondary: '#EC4899',    // Дополнительный
-  success: '#10B981',      // Успех
-  error: '#EF4444',        // Ошибка
-  warning: '#F59E0B',      // Предупреждение
-  // ... остальные цвета
-}
-```
+You've successfully run and modified your React Native App. :partying_face:
 
-### Типографика
-- Размеры: xs(12) - xxxl(32)
-- Веса: light(300) - bold(700)
+### Now what?
 
-### Отступы и скругления
-- Spacing: xs(4) - xxl(48)
-- Border radius: sm(4) - full(9999)
+- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
+- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
 
-## 🔒 Безопасность
+# Troubleshooting
 
-### Аутентификация
-- JWT токены с автоматическим обновлением
-- Безопасное хранение в AsyncStorage
-- Автоматический logout при 401
+If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
 
-### Валидация
-- React Hook Form с validation rules
-- Валидация телефонов в формате E.164
-- Проверка силы пароля
+# Learn More
 
-## 📡 API Integration
+To learn more about React Native, take a look at the following resources:
 
-### Base URL
-- **Development**: `http://localhost:8081`
-- **Production**: `https://api.lunary.app`
-
-### Endpoints
-```typescript
-AUTH: {
-  REGISTRATION: '/api/v1/registration',
-  LOGIN: '/api/v1/login',
-},
-SCENARIOS: {
-  LIST: '/api/v1/scenarios',
-  DETAIL: '/api/v1/scenarios/:id',
-}
-```
-
-### Error Handling
-- Структурированные ошибки с кодами
-- Пользовательские сообщения на русском
-- Автоматический retry для network errors
-
-## 🧪 Тестирование
-
-```bash
-# Запуск тестов
-npm test
-
-# Линтинг
-npm run lint
-
-# Type checking
-npx tsc --noEmit
-```
-
-## 📦 Сборка
-
-### Development
-```bash
-# Android Debug
-npm run build:android
-
-# iOS Debug (только macOS)
-npm run build:ios
-```
-
-### Production
-```bash
-# Android Release
-cd android && ./gradlew assembleRelease
-
-# iOS Release (только macOS)
-cd ios && xcodebuild -workspace LunaryMobile.xcworkspace \
-  -scheme LunaryMobile -configuration Release archive
-```
-
-## 🔧 Конфигурация
-
-### Metro Config
-- Path mapping для удобных imports
-- React Native Reanimated plugin
-
-### Babel Config
-- Module resolver для @aliases
-- TypeScript preset
-
-### ESLint
-- React Native конфигурация
-- TypeScript правила
-
-## 📱 Features
-
-### ✅ Реализовано
-- 🔐 **Аутентификация** - вход/регистрация
-- 🏠 **Главная** - dashboard с статистикой
-- 📋 **Сценарии** - список с фильтрацией
-- 👤 **Профиль** - информация о пользователе
-- ⚙️ **Настройки** - конфигурация приложения
-- 🎨 **Дизайн система** - единое оформление
-- 📱 **Адаптивность** - поддержка разных экранов
-
-### 🚧 В разработке
-- 🔄 **Offline mode** - работа без интернета
-- 🌙 **Темная тема** - dark mode
-- 🔔 **Push уведомления** - Firebase integration
-- 📷 **Загрузка файлов** - media service integration
-- 🌐 **Локализация** - поддержка языков
-
-## 🤝 Разработка
-
-### Code Style
-- **TypeScript** для всех компонентов
-- **Functional components** с hooks
-- **Arrow functions** для консистентности
-- **Destructuring** для props
-
-### Naming Conventions
-- **PascalCase** для компонентов
-- **camelCase** для функций и переменных
-- **SCREAMING_SNAKE_CASE** для констант
-- **kebab-case** для файлов assets
-
-### Git Workflow
-```bash
-# Создание feature branch
-git checkout -b feature/new-screen
-
-# Commit с описанием
-git commit -m "feat: add new screen component"
-
-# Push и создание PR
-git push origin feature/new-screen
-```
-
-## 📞 Поддержка
-
-- **Issues**: [GitHub Issues](https://github.com/BSanjik/LUNARY/issues)
-- **Email**: support@lunary.app
-- **Документация**: [docs/](../docs/)
-
----
-
-**Сделано с ❤️ командой LUNARY**
+- [React Native Website](https://reactnative.dev) - learn more about React Native.
+- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
+- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
+- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
+- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.

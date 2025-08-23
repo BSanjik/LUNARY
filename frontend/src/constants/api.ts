@@ -1,7 +1,11 @@
 // API Configuration
 export const API_CONFIG = {
-  // Development
-  DEV_BASE_URL: 'http://localhost:8081',
+  // Development - через API Gateway
+  DEV_BASE_URL: 'http://localhost:8080',
+  
+  // Direct service URLs (для тестирования)
+  DEV_AUTH_URL: 'http://localhost:8081',
+  DEV_SCENARIO_URL: 'http://localhost:8082',
   
   // Production
   PROD_BASE_URL: 'https://api.lunary.app',
@@ -24,12 +28,10 @@ export const ENDPOINTS = {
     LOGOUT: '/api/v1/logout',
   },
   
-  // Scenario endpoints
+  // Scenario endpoints (соответствуют backend API)
   SCENARIOS: {
-    LIST: '/api/v1/scenarios',
-    DETAIL: '/api/v1/scenarios/:id',
-    STEPS: '/api/v1/scenarios/:id/steps',
-    FEEDBACK: '/api/v1/scenarios/:id/feedback',
+    SEARCH: '/search',
+    FEEDBACK: '/feedback',
   },
   
   // Health endpoints

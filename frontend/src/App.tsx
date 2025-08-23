@@ -6,9 +6,9 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
-import {store} from '@store/index';
-import {AppNavigator} from '@navigation/AppNavigator';
-import {theme} from '@constants/theme';
+import {store} from './store/index';
+import {AppNavigator} from './navigation/AppNavigator';
+import {theme} from './constants/theme';
 
 const App: React.FC = () => {
   return (

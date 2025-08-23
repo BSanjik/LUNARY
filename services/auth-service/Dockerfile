@@ -1,31 +1,25 @@
 # Dockerfile for auth-service
-FROM golang:1.23
+FROM golang:1.24 AS builder
 
-WORKDIR /app
+WORKDIR /app/auth-service
 
-# Установка необходимых утилит (включая curl для health checks)
-RUN apt-get update && apt-get install -y curl wget tar && \
-    rm -rf /var/lib/apt/lists/*
-
-# Скачивание и установка migrate
-RUN echo "📥 Скачиваем migrate..." && \
-    wget https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz && \
-    echo "📦 Распаковываем..." && \
-    tar -xvzf migrate.linux-amd64.tar.gz && \
-    echo "📂 Перемещаем..." && \
-    mv migrate /usr/local/bin/migrate && \
-    chmod +x /usr/local/bin/migrate && \
-    echo "🧹 Удаляем архив..." && \
-    rm migrate.linux-amd64.tar.gz
-
-COPY go.mod go.sum ./
+# Копируем структуру проекта
+COPY auth-service/go.mod auth-service/go.sum ./
+COPY common ../common
 RUN go mod download
 
-COPY . .
+# Скачиваем migrate
+RUN wget https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz && \
+    tar -xzf migrate.linux-amd64.tar.gz && \
+    mv migrate /usr/local/bin/
 
-# Установка swag
-ENV PATH="/go/bin:${PATH}"
+# Копируем миграции
+COPY auth-service/migrations/ ./migrations/
 
+# Копируем исходники
+COPY auth-service .
+
+# Установка swag и генерация документации
 RUN go install github.com/swaggo/swag/cmd/swag@latest && \
     rm -rf docs/* && \
     swag init --generalInfo cmd/main.go --output docs --parseDependency --parseInternal && \
@@ -35,13 +29,34 @@ RUN go install github.com/swaggo/swag/cmd/swag@latest && \
 # Сборка бинарника
 RUN go build -o auth-service ./cmd/main.go
 
+# Финальный образ
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates dos2unix libc6-compat bash curl
+
+WORKDIR /app
+
+# Копируем бинарник и migrate
+COPY --from=builder /app/auth-service/auth-service .
+COPY --from=builder /usr/local/bin/migrate /usr/local/bin/
+
+# Копируем миграции
+COPY --from=builder /app/auth-service/migrations ./migrations
+
+# Копируем скрипты запуска
+COPY --from=builder /app/auth-service/wait-for-it.sh .
+COPY --from=builder /app/auth-service/start.sh .
+
+# Конвертируем окончания строк и даем права
+RUN dos2unix ./wait-for-it.sh ./start.sh && \
+    chmod +x ./wait-for-it.sh ./start.sh ./auth-service
+
 # Порт приложения
 EXPOSE 8081
 
-# Скрипты запуска
-COPY wait-for-it.sh .
-COPY start.sh .
-RUN chmod +x ./wait-for-it.sh ./start.sh
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8081/health || exit 1
 
-# Используем скрипт запуска, который ждёт Postgres, делает миграции и запускает сервис
+# Используем скрипт запуска
 CMD ["./start.sh"]

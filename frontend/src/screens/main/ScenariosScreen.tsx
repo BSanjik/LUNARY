@@ -15,8 +15,8 @@ import {fetchScenarios} from '@store/slices/scenarioSlice';
 import {scenarioService} from '@services/scenarioService';
 import {theme} from '@constants/theme';
 import type {AppDispatch, RootState} from '@store/index';
-import type {MainTabScreenProps} from '@types/navigation';
-import type {Scenario} from '@types/scenario';
+import type {MainTabScreenProps} from '../../types/navigation';
+import type {Scenario} from '../../types/scenario';
 
 export const ScenariosScreen: React.FC<MainTabScreenProps<'Scenarios'>> = () => {
   const dispatch = useDispatch<AppDispatch>();

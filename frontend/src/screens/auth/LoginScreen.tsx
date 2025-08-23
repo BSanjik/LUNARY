@@ -18,8 +18,8 @@ import {loginUser, clearError} from '@store/slices/authSlice';
 import {authService} from '@services/authService';
 import {theme} from '@constants/theme';
 import type {AppDispatch, RootState} from '@store/index';
-import type {AuthScreenProps} from '@types/navigation';
-import type {LoginRequest} from '@types/auth';
+import type {AuthScreenProps} from '../../types/navigation';
+import type {LoginRequest} from '../../types/auth';
 
 type FormData = LoginRequest;
 

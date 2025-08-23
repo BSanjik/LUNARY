@@ -3,12 +3,16 @@ services:
   api-gateway:
     container_name: lunary-gateway
     build:
-      context: ./services/api-gateway
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: api-gateway/Dockerfile
     ports:
       - "8080:8080"
-    env_file:
-      - ./services/api-gateway/.env
+    environment:
+      - PORT=8080
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - SCENARIO_SERVICE_URL=http://scenario-service:8082
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - LOG_LEVEL=info
     depends_on:
       - auth-service
       - scenario-service
@@ -18,50 +22,53 @@ services:
   auth-service:
     container_name: lunary-auth
     build:
-      context: ./services/auth-service
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: auth-service/Dockerfile
     ports:
       - "8081:8081"
-    env_file:
-    - ./services/auth-service/.env
+    environment:
+      - PORT=8081
+      - DB_URL=postgres://lunary_user:lunary_password@postgres:5432/lunary?sslmode=disable
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - LOG_LEVEL=info
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - ./services/auth-service/migrations:/app/migrations
     command: ["./start.sh"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health/ready"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8081/health/ready"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
     networks:
       - lunary-network
 
   scenario-service:
     container_name: lunary-scenario
     build:
-      context: ./services/scenario-service
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: scenario-service/Dockerfile
     ports:
       - "8082:8082"
-    env_file:
-      - ./services/scenario-service/.env
+    environment:
+      - PORT=8082
+      - DB_URL=postgres://lunary_user:lunary_password@postgres:5432/lunary?sslmode=disable
+      - LOG_LEVEL=info
     depends_on:
-      postgres:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
+      - postgres
+      - auth-service
     volumes:
       - ./services/scenario-service/migrations:/app/migrations
     command: ["./start.sh"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/health/ready"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8082/health/ready"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
     networks:
       - lunary-network
       
@@ -69,19 +76,17 @@ services:
     container_name: lunary-postgres
     image: postgres:15
     restart: always
-    env_file:
-      - ./.env
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=lunary
+      - POSTGRES_USER=lunary_user
+      - POSTGRES_PASSWORD=lunary_password
     ports:
       - "5432:5432"
     volumes:
       - lunary-pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U lunary_user -d lunary"]
       interval: 10s
       timeout: 5s
       retries: 5

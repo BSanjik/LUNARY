@@ -7,7 +7,7 @@ import type {
   Feedback,
   FeedbackRequest,
   ApiError,
-} from '@types/scenario';
+} from '../../types/scenario';
 
 // Initial state
 const initialState: ScenarioState = {
@@ -124,7 +124,7 @@ const scenarioSlice = createSlice({
       })
       .addCase(fetchScenario.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.currentScenario = action.payload;
+        state.currentScenario = action.payload || null;
         state.error = null;
       })
       .addCase(fetchScenario.rejected, (state, action) => {

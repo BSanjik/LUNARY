@@ -5,7 +5,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   ApiResponse,
-} from '@types/auth';
+} from '../types/auth';
 
 class AuthService {
   // User registration

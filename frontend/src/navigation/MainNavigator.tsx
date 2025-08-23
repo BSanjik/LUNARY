@@ -7,7 +7,7 @@ import {ScenariosScreen} from '@screens/main/ScenariosScreen';
 import {ProfileScreen} from '@screens/main/ProfileScreen';
 import {SettingsScreen} from '@screens/main/SettingsScreen';
 import {theme} from '@constants/theme';
-import type {MainTabParamList} from '@types/navigation';
+import type {MainTabParamList} from '../types/navigation';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 

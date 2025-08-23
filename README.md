@@ -38,7 +38,7 @@
 | **auth-service** | 8081 | Регистрация, авторизация, JWT | ✅ Production |
 | **scenario-service** | 8082 | Управление сценариями, отзывы | ✅ Production |
 | **user-service** | 8083 | Профили пользователей | 🚧 In Progress |
-| **ad-service** | 8084 | Создание и поиск объявлений | 🚧 In Progress |
+| **road-service** | 8084 | Создание маршрута (машина и тд) | 🚧 In Progress |
 | **media-service** | 8085 | Загрузка медиафайлов | 🚧 In Progress |
 | **notification-service** | 8086 | Email и push уведомления | 🚧 In Progress |
 
