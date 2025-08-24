@@ -22,7 +22,6 @@ type AuthService struct {
 type RegisterDTO struct {
 	Phone    string `validate:"required,e164"`
 	Password string `validate:"required,min=6"`
-	Email    string `validate:"omitempty,email"`
 }
 
 // DTO для валидации входа
@@ -32,11 +31,10 @@ type LoginDTO struct {
 }
 
 // Валидация данных регистрации
-func (s *AuthService) validateRegistrationData(phone, password, email string) error {
+func (s *AuthService) validateRegistrationData(phone, password string) error {
 	dto := RegisterDTO{
 		Phone:    strings.TrimSpace(phone),
 		Password: strings.TrimSpace(password),
-		Email:    strings.TrimSpace(email),
 	}
 
 	if err := s.Validator.Struct(dto); err != nil {
@@ -86,7 +84,7 @@ func (s *AuthService) getValidationMessage(err validator.FieldError) string {
 
 func (s *AuthService) Register(phone, password string) (*model.AuthResponse, error) {
 	// Валидация входных данных
-	if err := s.validateRegistrationData(phone, password, ""); err != nil {
+	if err := s.validateRegistrationData(phone, password); err != nil {
 		shared.LogAuthEvent("register", phone, 0, false, "validation_failed")
 		return nil, err
 	}
@@ -125,7 +123,7 @@ func (s *AuthService) Register(phone, password string) (*model.AuthResponse, err
 	err = s.Storage.DB.QueryRow(
 		"INSERT INTO users (phone, password) VALUES ($1, $2) RETURNING id, phone, email, created_at",
 		phone, hashedPassword,
-	).Scan(&user.ID, &user.Phone, &user.Email, &user.CreatedAt)
+	).Scan(&user.ID, &user.Phone, &user.CreatedAt)
 
 	if err != nil {
 		shared.LogError(err, "User creation failed", map[string]interface{}{
@@ -176,7 +174,7 @@ func (s *AuthService) Login(phone, password string) (*model.AuthResponse, error)
 	err := s.Storage.DB.QueryRow(
 		"SELECT id, phone, email, password, created_at FROM users WHERE phone = $1",
 		phone,
-	).Scan(&user.ID, &user.Phone, &user.Email, &hashedPassword, &user.CreatedAt)
+	).Scan(&user.ID, &user.Phone, &hashedPassword, &user.CreatedAt)
 
 	if err == sql.ErrNoRows {
 		shared.LogAuthEvent("login", phone, 0, false, "user_not_found")
